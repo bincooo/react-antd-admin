@@ -1,9 +1,9 @@
 import type { Options } from "ky";
 
+import ky from "ky";
 import { loginPath } from "#src/router/extra-info";
 import { useAuthStore } from "#src/store/auth";
 import { usePreferencesStore } from "#src/store/preferences";
-import ky from "ky";
 
 import { AUTH_HEADER, LANG_HEADER, REFRESH_TOKEN_PATH } from "./constants";
 import { handleErrorResponse } from "./error-response";
@@ -18,8 +18,7 @@ const requestWhiteList = [loginPath];
 const API_TIMEOUT = Number(import.meta.env.VITE_API_TIMEOUT) || 10000;
 
 const defaultConfig: Options = {
-	// The input argument cannot start with a slash / when using prefixUrl option.
-	prefixUrl: import.meta.env.VITE_API_BASE_URL,
+	prefix: import.meta.env.VITE_API_BASE_URL,
 	timeout: API_TIMEOUT,
 	retry: {
 		// 当请求失败时，最多重试次数
@@ -27,7 +26,7 @@ const defaultConfig: Options = {
 	},
 	hooks: {
 		beforeRequest: [
-			(request, options) => {
+			({ request, options }) => {
 				const ignoreLoading = options.ignoreLoading;
 				if (!ignoreLoading) {
 					globalProgress.start();
@@ -43,7 +42,7 @@ const defaultConfig: Options = {
 			},
 		],
 		afterResponse: [
-			async (request, options, response) => {
+			async ({ request, options, response }) => {
 				const ignoreLoading = options.ignoreLoading;
 				if (!ignoreLoading) {
 					globalProgress.done();

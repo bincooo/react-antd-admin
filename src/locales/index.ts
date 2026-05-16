@@ -29,11 +29,6 @@ export const i18nInitOptions: InitOptions = {
 	lng: "zh-CN",
 	resources: i18nResources,
 	saveMissing: import.meta.env.DEV,
-	/**
-	 * Suppress locize.com advertisement notice
-	 * @see https://github.com/i18next/i18next/issues/2385
-	 */
-	showSupportNotice: false,
 	missingKeyHandler: async (languages, namespace, translationKey) => {
 		if (import.meta.env.PROD) {
 			return;

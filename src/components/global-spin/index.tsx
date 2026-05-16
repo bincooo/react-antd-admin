@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
-import { useGlobalStore } from "#src/store/global";
-import { usePreferencesStore } from "#src/store/preferences";
-
-import { cn } from "#src/utils/cn";
 import { Spin } from "antd";
-
 import { createUseStyles } from "react-jss";
+
 import { useSpinDelay } from "spin-delay";
+import { useGlobalStore } from "#src/store/global";
+
+import { usePreferencesStore } from "#src/store/preferences";
+import { cn } from "#src/utils/cn";
 
 export interface GlobalSpinProps {
 	className?: string
@@ -44,7 +44,9 @@ export function GlobalSpin({ children, className }: GlobalSpinProps) {
 		<Spin
 			delay={300}
 			spinning={loading}
-			wrapperClassName={cn(classes.rootSpin, className)}
+			classNames={{
+				root: cn(classes.rootSpin, className),
+			}}
 		>
 			{children}
 		</Spin>

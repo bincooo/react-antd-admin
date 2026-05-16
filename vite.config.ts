@@ -132,12 +132,28 @@ export default defineConfig({
 		license: true,
 		outDir: "build",
 		sourcemap: false,
-		rollupOptions: {
+		// Adjust chunk size warning limit (default 500 kB).
+		chunkSizeWarningLimit: 2000,
+		rolldownOptions: {
 			output: {
-				manualChunks: {
-					react: ["react", "react-dom", "react-router"],
-					antd: ["antd", "@ant-design/icons"],
-					faker: ["@faker-js/faker"],
+				codeSplitting: {
+					groups: [
+						{
+							name: "react",
+							// ["react", "react-dom", "react-router"]
+							test: /node_modules[\\/]react/,
+						},
+						{
+							name: "antd",
+							// ["antd", "@ant-design/icons"]
+							test: /node_modules[\\/](antd|@ant-design[\\/]icons)/,
+						},
+						{
+							name: "faker",
+							// ["@faker-js/faker"]
+							test: /node_modules[\\/]@faker-js[\\/]faker/,
+						},
+					],
 				},
 			},
 		},

@@ -6,8 +6,14 @@ import {
 	UserOutlined,
 } from "@ant-design/icons";
 import { Button, Card, Col, Row } from "antd";
-import CountUp from "react-countup";
+import CountUpModule from "react-countup";
 import { useTranslation } from "react-i18next";
+
+/**
+ * Broken default export with Vite 8 / Rolldown
+ * @see https://github.com/glennreyes/react-countup/issues/884
+ */
+const CountUp = (CountUpModule as unknown as { default?: typeof CountUpModule }).default ?? CountUpModule;
 
 const wrapperCol: ColProps = {
 	xs: 24,
@@ -50,7 +56,7 @@ export default function CardList() {
 			{
 				CARD_LIST.map((cardItem) => {
 					return (
-						<Col {...wrapperCol} key={cardItem.title}>
+						<Col key={cardItem.title} {...wrapperCol}>
 							<Card className="">
 								<div className="flex justify-between items-center">
 									<div className="flex flex-col">
