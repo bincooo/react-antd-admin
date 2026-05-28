@@ -5,24 +5,24 @@
 /**
  * 按钮权限前缀
  */
-export const permissionPrefix = "permission:button";
+// export const permissionPrefix = "permission:button";
 
-/**
- * 常见按钮权限：
- * - get: 获取
- * - update: 更新
- * - delete: 删除
- * - add: 新增
- */
-export const accessControlCodes = {
-	get: `${permissionPrefix}:get`,
-	update: `${permissionPrefix}:update`,
-	delete: `${permissionPrefix}:delete`,
-	add: `${permissionPrefix}:add`,
-};
+// /**
+//  * 常见按钮权限：
+//  * - get: 获取
+//  * - update: 更新
+//  * - delete: 删除
+//  * - add: 新增
+//  */
+// export const accessControlCodes = {
+// 	get: `${permissionPrefix}:get`,
+// 	update: `${permissionPrefix}:update`,
+// 	delete: `${permissionPrefix}:delete`,
+// 	add: `${permissionPrefix}:add`,
+// };
 
-export const AccessControlRoles = {
-	admin: "admin",
-	common: "common",
-	// user: "user",
-};
+// export const AccessControlRoles = {
+// 	admin: "admin",
+// 	common: "common",
+// 	// user: "user",
+// };

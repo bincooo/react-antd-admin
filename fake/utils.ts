@@ -1,7 +1,7 @@
-export function resultSuccess(result: unknown, { message = "ok" } = {}) {
+export function resultSuccess(data: unknown, { message = "ok" } = {}) {
 	return {
 		code: 200,
-		result,
+		data,
 		message,
 		success: true,
 	};

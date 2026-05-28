@@ -1,11 +1,11 @@
-import type { PieDataType } from "#src/api/home";
 import type { EChartsOption } from "echarts";
-import { fetchPie } from "#src/api/home";
+import type { PieDataType } from "#src/api/home";
 import { Card, Segmented } from "antd";
 import ReactECharts from "echarts-for-react";
-
 import { useEffect, useState } from "react";
+
 import { useTranslation } from "react-i18next";
+import { fetchPie } from "#src/api/home";
 
 export default function PieChart() {
 	const { t } = useTranslation();
@@ -56,9 +56,9 @@ export default function PieChart() {
 
 	useEffect(() => {
 		if (value) {
-			fetchPie({ by: value }).then(({ result }) => {
+			fetchPie({ by: value }).then(({ data }) => {
 				setData(
-					result.map((item) => {
+					data.map((item) => {
 						const code = item.code as keyof typeof DATA_KEY;
 						return {
 							...item,

@@ -8,16 +8,22 @@ export * from "./types";
 
 export function fetchLogin(data: LoginInfo) {
 	return request
-		.post("login", { json: data })
+		.post("auth/login", {
+			json: {
+				...data,
+				clientId: import.meta.env.VITE_CLIENTID,
+				tenantId: "000000",
+			},
+		})
 		.json<ApiResponse<AuthType>>();
 }
 
 export function fetchLogout() {
-	return request.post("logout").json();
+	return request.post("auth/logout").json();
 }
 
 export function fetchAsyncRoutes() {
-	return request.get("get-async-routes").json<ApiResponse<AppRouteRecordRaw[]>>();
+	return request.get("system/menu/getRouters").json<ApiResponse<AppRouteRecordRaw[]>>();
 }
 
 export function fetchUserInfo() {

@@ -36,6 +36,7 @@ const defaultConfig: Options = {
 				if (!isWhiteRequest) {
 					const { token } = useAuthStore.getState();
 					request.headers.set(AUTH_HEADER, `Bearer ${token}`);
+					request.headers.set("clientid", import.meta.env.VITE_CLIENTID);
 				}
 				// 语言等所有的接口都需要携带
 				request.headers.set(LANG_HEADER, usePreferencesStore.getState().language);
@@ -47,31 +48,48 @@ const defaultConfig: Options = {
 				if (!ignoreLoading) {
 					globalProgress.done();
 				}
-				// request error
-				if (!response.ok) {
-					if (response.status === 401) {
-						// 防止刷新 refresh-token 继续接收到的 401 错误，出现死循环
-						if ([`/${REFRESH_TOKEN_PATH}`].some(url => request.url.endsWith(url))) {
+
+				const handle401 = () => {
+					// 防止刷新 refresh-token 继续接收到的 401 错误，出现死循环
+					if ([`/${REFRESH_TOKEN_PATH}`].some(url => request.url.endsWith(url))) {
+						goLogin();
+						return response;
+					}
+					// If the token is expired, refresh it and try again.
+					const { refreshToken } = useAuthStore.getState();
+					// If there is no refresh token, it means that the user has not logged in.
+					if (!refreshToken) {
+						// 如果页面的路由已经重定向到登录页，则不用跳转直接返回结果
+						if (location.pathname === loginPath) {
+							return response;
+						}
+						else {
 							goLogin();
 							return response;
 						}
-						// If the token is expired, refresh it and try again.
-						const { refreshToken } = useAuthStore.getState();
-						// If there is no refresh token, it means that the user has not logged in.
-						if (!refreshToken) {
-							// 如果页面的路由已经重定向到登录页，则不用跳转直接返回结果
-							if (location.pathname === loginPath) {
-								return response;
-							}
-							else {
-								goLogin();
-								return response;
-							}
-						}
+					}
 
-						return refreshTokenAndRetry(request, options, refreshToken);
+					return refreshTokenAndRetry(request, options, refreshToken);
+				};
+
+				// request error
+				if (!response.ok) {
+					if (response.status === 401) {
+						return handle401();
 					}
 					else {
+						return handleErrorResponse(response);
+					}
+				}
+
+				const contentType = response.headers.get("content-type");
+				if (contentType?.includes("application/json")) {
+					const resp = response.clone();
+					const { code } = await resp.json();
+					if (code === 401) {
+						return handle401();
+					}
+					if (code !== 200) {
 						return handleErrorResponse(response);
 					}
 				}

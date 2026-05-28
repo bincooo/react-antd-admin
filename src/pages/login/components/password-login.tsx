@@ -1,9 +1,5 @@
 import type { LoginInfo } from "#src/api/user";
 
-import { BasicButton } from "#src/components/basic-button";
-import { PASSWORD_RULES, USERNAME_RULES } from "#src/constants/rules";
-import { useAuthStore } from "#src/store/auth";
-
 import {
 	Button,
 	Form,
@@ -12,14 +8,17 @@ import {
 	Space,
 } from "antd";
 import { use, useState } from "react";
+
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router";
+import { PASSWORD_RULES, USERNAME_RULES } from "#src/constants/rules";
+import { useAuthStore } from "#src/store/auth";
 
 import { FormModeContext } from "../form-mode-context";
 
 const FORM_INITIAL_VALUES: LoginInfo = {
 	username: "admin",
-	password: "123456789admin",
+	password: "admin123",
 };
 
 export function PasswordLogin() {
@@ -35,8 +34,7 @@ export function PasswordLogin() {
 	const handleFinish = async (values: LoginInfo) => {
 		setLoading(true);
 		messageLoadingApi?.loading(t("authority.loginInProgress"), 0);
-
-		login(values).then(() => {
+		login({ ...values, grantType: "password" }).then(() => {
 			messageLoadingApi?.destroy();
 			window.$message?.success(t("authority.loginSuccess"));
 			const redirect = searchParams.get("redirect");
@@ -46,6 +44,8 @@ export function PasswordLogin() {
 			else {
 				navigate(import.meta.env.VITE_BASE_HOME_PATH);
 			}
+		}).catch((err) => {
+			window.$message?.error(`${err}`);
 		}).finally(() => {
 			messageLoadingApi?.destroy();
 			// Prevent multiple requests from being made by clicking the login button
@@ -95,7 +95,7 @@ export function PasswordLogin() {
 
 				<Form.Item>
 					<div className="flex justify-between mb-5 -mt-1 text-sm">
-						<BasicButton
+						<Button
 							type="link"
 							className="p-0"
 							onPointerDown={() => {
@@ -103,8 +103,8 @@ export function PasswordLogin() {
 							}}
 						>
 							{t("authority.codeLogin")}
-						</BasicButton>
-						<BasicButton
+						</Button>
+						<Button
 							type="link"
 							className="p-0"
 							onPointerDown={() => {
@@ -112,7 +112,7 @@ export function PasswordLogin() {
 							}}
 						>
 							{t("authority.forgotPassword")}
-						</BasicButton>
+						</Button>
 					</div>
 					<Button block type="primary" htmlType="submit" loading={loading}>
 						{t("authority.login")}
@@ -121,7 +121,7 @@ export function PasswordLogin() {
 
 				<div className="text-sm text-center">
 					{t("authority.noAccountYet")}
-					<BasicButton
+					<Button
 						type="link"
 						className="px-1"
 						onPointerDown={() => {
@@ -129,7 +129,7 @@ export function PasswordLogin() {
 						}}
 					>
 						{t("authority.goToRegister")}
-					</BasicButton>
+					</Button>
 				</div>
 			</Form>
 		</>

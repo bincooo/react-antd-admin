@@ -8,6 +8,7 @@ export interface AuthType {
 export interface LoginInfo {
 	username: string
 	password: string
+	grantType?: string
 }
 
 export interface UserInfoType {

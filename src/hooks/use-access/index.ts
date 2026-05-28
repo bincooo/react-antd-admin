@@ -1,10 +1,10 @@
-import { useUserStore } from "#src/store/user";
-import { isString } from "#src/utils/is";
-
 import { useMatches } from "react-router";
-import { accessControlCodes, AccessControlRoles } from "./constants";
+import { useUserStore } from "#src/store/user";
 
-export * from "./constants";
+import { isString } from "#src/utils/is";
+// import { accessControlCodes, AccessControlRoles } from "./constants";
+
+// export * from "./constants";
 
 /**
  * @zh 权限判断
@@ -21,7 +21,7 @@ export function useAccess() {
 	 * @param permission 全部小写的权限名称或权限名称数组，比如 `["add", "delete"]`。
 	 * @returns boolean 是否具有指定权限
 	 */
-	const hasAccessByCodes = (permission?: string | Array<string>) => {
+	const hasPerms = (permission?: string | Array<string>) => {
 		if (!permission)
 			return false;
 		/** 从当前路由的 `handle` 字段里获取按钮级别的所有自定义 `code` 值 */
@@ -33,11 +33,11 @@ export function useAccess() {
 		permission = permission.map(item => item.toLowerCase());
 		if (import.meta.env.DEV) {
 			// 校验权限代码是否合法，不合法的权限代码会打印警告信息
-			for (const code of permission) {
-				if (!Object.values(accessControlCodes).includes(code)) {
-					console.warn(`[hasAccessByCodes]: '${code}' is not a valid permission code`);
-				}
-			}
+			// for (const code of permission) {
+			// 	if (!Object.values(accessControlCodes).includes(code)) {
+			// 		console.warn(`[hasAccessByCodes]: '${code}' is not a valid permission code`);
+			// 	}
+			// }
 		}
 		const isAuth = metaAuth.some(item => permission.includes(item.toLowerCase()));
 		return isAuth;
@@ -49,7 +49,7 @@ export function useAccess() {
 	 * @param roles 全部小写的权限名称或权限名称数组，比如 `["admin", "super", "user"]`。
 	 * @returns boolean 是否具有指定权限
 	 */
-	const hasAccessByRoles = (roles?: string | Array<string>) => {
+	const hasRoles = (roles?: string | Array<string>) => {
 		if (!roles || !userRoles) {
 			return false;
 		}
@@ -57,15 +57,15 @@ export function useAccess() {
 		roles = roles.map(item => item.toLowerCase());
 		if (import.meta.env.DEV) {
 			// 校验角色是否合法，不合法的角色会打印警告信息
-			for (const roleItem of roles) {
-				if (!Object.values(AccessControlRoles).includes(roleItem)) {
-					console.warn(`[hasAccessByRoles]: '${roleItem}' is not a valid role`);
-				}
-			}
+			// for (const roleItem of roles) {
+			// 	if (!Object.values(AccessControlRoles).includes(roleItem)) {
+			// 		console.warn(`[hasAccessByRoles]: '${roleItem}' is not a valid role`);
+			// 	}
+			// }
 		}
 		const isAuth = userRoles.some(item => roles.includes(item.toLowerCase()));
 		return isAuth;
 	};
 
-	return { hasAccessByCodes, hasAccessByRoles };
+	return { hasPerms, hasRoles };
 }

@@ -4,7 +4,7 @@
  */
 interface ApiResponse<T> {
 	code: number
-	result: T
+	data: T
 	message: string
 	success: boolean
 }
@@ -14,7 +14,7 @@ interface ApiResponse<T> {
  * list: 接口返回数据
  */
 interface ApiListResponse<T> extends ApiResponse<T> {
-	result: {
+	data: {
 		list: T[]
 		total: number
 		current: number

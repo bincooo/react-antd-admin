@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { matchRoutes, Navigate, useLocation, useNavigate, useSearchParams } from "react-router";
 import { fetchAsyncRoutes } from "#src/api/user";
 import { useCurrentRoute } from "#src/hooks/use-current-route";
 import { hideLoading } from "#src/plugins/hide-loading";
@@ -9,11 +11,9 @@ import { generateRoutesFromBackend } from "#src/router/utils/generate-routes-fro
 import { generateRoutesByFrontend } from "#src/router/utils/generate-routes-from-frontend";
 import { useAccessStore } from "#src/store/access";
 import { useAuthStore } from "#src/store/auth";
+
 import { usePreferencesStore } from "#src/store/preferences";
 import { useUserStore } from "#src/store/user";
-
-import { useEffect } from "react";
-import { matchRoutes, Navigate, useLocation, useNavigate, useSearchParams } from "react-router";
 
 import { removeDuplicateRoutes } from "./utils";
 
@@ -100,8 +100,8 @@ export function AuthGuard({ children }: AuthGuardProps) {
 			 * @zh 启用了后端路由且路由从单独接口中获取
 			 * @en If backend routing is enabled and the route is obtained from a separate interface
 			 */
-			if (enableBackendAccess && isSendRoutingRequest && routeResult.status === "fulfilled" && "result" in routeResult.value) {
-				routes.push(...await generateRoutesFromBackend(routeResult.value?.result ?? []));
+			if (enableBackendAccess && isSendRoutingRequest && routeResult.status === "fulfilled" && "data" in routeResult.value) {
+				routes.push(...await generateRoutesFromBackend(routeResult.value?.data ?? []));
 			}
 
 			/**

@@ -1,10 +1,10 @@
 import type { TabPaneProps } from "antd";
 
-import { usePreferencesStore } from "#src/store/preferences";
-import { getAppNamespace } from "#src/utils/get-app-namespace";
-
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+
+import { usePreferencesStore } from "#src/store/preferences";
+import { getAppNamespace } from "#src/utils/get-app-namespace";
 
 /**
  * @zh 标签页项目属性接口
@@ -72,12 +72,12 @@ interface TabsAction {
 	setIsRefresh: (state: boolean) => void
 	addTab: (routePath: string, tabProps: TabStateType) => void
 	insertBeforeTab: (routePath: string, tabProps: TabStateType) => void
-	removeTab: (routePath: string) => void
+	removeTab: (routePath?: string) => void
 	closeRightTabs: (routePath: string) => void
 	closeLeftTabs: (routePath: string) => void
 	closeOtherTabs: (routePath: string) => void
 	closeAllTabs: () => void
-	setActiveKey: (routePath: string) => void
+	setActiveKey: (routePath: string, create?: boolean) => void
 	resetTabs: () => void
 	changeTabOrder: (from: number, to: number) => void
 	toggleMaximize: (state: boolean) => void
@@ -106,8 +106,13 @@ export const useTabsStore = create<TabsState & TabsAction>()(
 			 * @zh 设置标签页
 			 * @en Set the tab.
 			 */
-			setActiveKey: (routePath: string) => {
-				set({ activeKey: routePath });
+			setActiveKey: (routePath: string, create: boolean = true) => {
+				set((state) => {
+					if (create || state.openTabs.has(routePath)) {
+						return { activeKey: routePath };
+					}
+					return state;
+				});
 			},
 
 			/**
@@ -150,9 +155,12 @@ export const useTabsStore = create<TabsState & TabsAction>()(
 			 * @zh 移除标签页
 			 * @en Remove a tab.
 			 */
-			removeTab: (routePath: string) => {
+			removeTab: (routePath?: string) => {
 				set((state) => {
 					const homePath = import.meta.env.VITE_BASE_HOME_PATH;
+					if (!routePath) {
+						routePath = state.activeKey;
+					}
 
 					// 如果是首页，不允许关闭
 					if (routePath === homePath) {

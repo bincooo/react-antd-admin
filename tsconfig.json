@@ -31,5 +31,11 @@
 		"tests",
 		"vite.config.ts",
 		"commitlint.config.ts"
-	]
+	],
+	"regex": {
+		"~icons\\/([\\/\\w-]+)": "#src/icons/$1.svg",
+		"@umijs/max": "#libs/mock__@umijs_max",
+		"#src/hooks/use-access": "#libs/mock__access",
+		"export \\* from \"./ri\";": "export {};"
+	}
 }

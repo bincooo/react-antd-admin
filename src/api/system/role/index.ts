@@ -1,34 +1,46 @@
-import type { RoleItemType } from "./types";
 import { request } from "#src/utils/request";
 
-export * from "./types";
-
-/* 获取角色列表 */
-export function fetchRoleList(data: any) {
-	return request.get<ApiListResponse<RoleItemType>>("role-list", { searchParams: data, ignoreLoading: true }).json();
+/**
+ * 分页查询角色信息列表
+ * @param query
+ * @returns {*}
+ */
+export function page(query: any) {
+	return request.get<ApiListResponse<System.Role>>("system/role/list", { searchParams: query }).json();
 }
 
-/* 新增角色 */
-export function fetchAddRoleItem(data: RoleItemType) {
-	return request.post<ApiResponse<string>>("role-item", { json: data, ignoreLoading: true }).json();
+/**
+ * 根据ID查询角色信息
+ * @param roleId
+ */
+export function getById(id: string | number) {
+	return request.get<ApiResponse<System.Role>>(`system/role/${id}`).json();
+};
+
+/**
+ * 新增角色信息
+ * @param data
+ */
+export function create(data: System.Role) {
+	return request.post<ApiResponse<void>>("system/role", { json: data }).json();
 }
 
-/* 修改角色 */
-export function fetchUpdateRoleItem(data: RoleItemType) {
-	return request.put<ApiResponse<string>>("role-item", { json: data, ignoreLoading: true }).json();
+/**
+ * 修改角色信息
+ * @param data
+ */
+export function update(data: System.Role) {
+	return request.put<ApiResponse<void>>("system/role", { json: data }).json();
 }
 
-/* 删除角色 */
-export function fetchDeleteRoleItem(id: number) {
-	return request.delete<ApiResponse<string>>("role-item", { json: id, ignoreLoading: true }).json();
+/**
+ * 删除角色信息
+ * @param ids
+ */
+export function deleteByIds(ids: Array<number | string>) {
+	return request.delete<ApiResponse<void>>(`system/role/${ids.join(",")}`).json();
 }
 
-/* 获取菜单 */
-export function fetchRoleMenu() {
-	return request.get<ApiResponse<RoleItemType[]>>("role-menu", { ignoreLoading: true }).json();
-}
-
-/* 角色绑定的菜单 id */
-export function fetchMenuByRoleId(data: { id: number }) {
-	return request.get<ApiResponse<string[]>>("menu-by-role-id", { searchParams: data, ignoreLoading: false }).json();
+export function dictTypes(types: string[]) {
+	return request.get<ApiResponse<Record<string, { dictLabel: string, dictValue: string }[]>>>(`system/dict/data/types/${types.join(",")}`).json();
 }

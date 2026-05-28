@@ -19,17 +19,17 @@ interface AccessControlProps {
  * @returns 若子组件存在，并且传入的权限值有效，则返回子组件；否则返回 null
  */
 export function AccessControl({ type = "code", codes, children, fallback }: AccessControlProps) {
-	const { hasAccessByCodes, hasAccessByRoles } = useAccess();
+	const { hasPerms, hasRoles } = useAccess();
 
 	if (!children)
 		return null;
 
 	if (!type || type === "code") {
-		return hasAccessByCodes(codes) ? children : fallback;
+		return hasPerms(codes) ? children : fallback;
 	}
 
 	if (type === "role") {
-		return hasAccessByRoles(codes) ? children : fallback;
+		return hasRoles(codes) ? children : fallback;
 	}
 
 	return fallback;

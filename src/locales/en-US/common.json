@@ -29,6 +29,7 @@
 		"role": "Role Management",
 		"menu": "Menu Management",
 		"dept": "Department Management",
+		"develop": "System Development",
 		"personalCenter": "Personal Center",
 		"profile": "My Profile",
 		"settings": "Settings"

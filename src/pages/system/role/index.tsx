@@ -1,138 +1,189 @@
-import type { RoleItemType } from "#src/api/system/role";
-import type { ActionType, ProColumns, ProCoreActionType } from "@ant-design/pro-components";
+import type {
+	ActionType,
+	ProColumns,
+	ProCoreActionType,
+} from "@ant-design/pro-components";
 
-import { fetchDeleteRoleItem, fetchMenuByRoleId, fetchRoleList, fetchRoleMenu } from "#src/api/system/role";
-import { BasicButton } from "#src/components/basic-button";
-import { BasicContent } from "#src/components/basic-content";
-import { BasicTable } from "#src/components/basic-table";
-import { accessControlCodes, useAccess } from "#src/hooks/use-access";
-import { handleTree } from "#src/utils/tree";
+import { DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons";
+import { useMutation } from "@tanstack/react-query";
+import { Button, Tag } from "antd";
 
-import { PlusCircleOutlined } from "@ant-design/icons";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Button, Popconfirm } from "antd";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import * as api from "#src/api/system/role";
+import { BasicContent } from "#src/components/basic-content";
+import { BasicTable } from "#src/components/basic-table";
 
-import { Detail } from "./components/detail";
-import { getConstantColumns } from "./constants";
+import { useAccess } from "#src/hooks/use-access";
+import { getColumnList } from "./columns";
+import Edit from "./components/edit";
 
-export default function Role() {
+export default function Page() {
 	const { t } = useTranslation();
-	const { hasAccessByCodes } = useAccess();
-	const { data: menuItems } = useQuery({
-		queryKey: ["role-menu"],
-		queryFn: async () => {
-			const responseData = await fetchRoleMenu();
-			return responseData?.result.map(item => ({
-				...item,
-				title: item.name,
-				key: item.id,
-			}));
+	const { hasPerms } = useAccess();
+
+	const deleteMutation = useMutation({
+		mutationFn: async (ids: (string | number)[]) => {
+			const { code, message } = await api.deleteByIds(ids);
+			if (code !== 200) {
+				window.$message?.error(message);
+				throw new Error(message);
+			}
+			return true;
 		},
-		initialData: [],
 	});
-	const deleteRoleItemMutation = useMutation({
-		mutationFn: fetchDeleteRoleItem,
-	});
-	/* Detail Data */
+
 	const [isOpen, setIsOpen] = useState(false);
 	const [title, setTitle] = useState("");
-	const [detailData, setDetailData] = useState<Partial<RoleItemType> & { menus?: string[] }>({});
+	const [item, setItem] = useState<Partial<System.Role>>({});
+	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-	const actionRef = useRef<ActionType>(null);
-
-	const handleDeleteRow = async (id: number, action?: ProCoreActionType<object>) => {
-		const responseData = await deleteRoleItemMutation.mutateAsync(id);
-		await action?.reload?.();
-		window.$message?.success(`${t("common.deleteSuccess")} id = ${responseData.result}`);
+	const onCloseChange = () => {
+		setIsOpen(false);
+		setItem({});
 	};
 
-	const columns: ProColumns<RoleItemType>[] = [
-		...getConstantColumns(t),
+	const actionRef = useRef<ActionType>(null);
+	const refreshTable = () => {
+		actionRef.current?.reload();
+	};
+
+	const handleDeleteRow = async (
+		ids: Array<string | number>,
+		action?: ProCoreActionType<object>,
+	) => {
+		if (!ids || ids.length === 0) {
+			window.$message?.error("请选择要删除的行");
+			return;
+		}
+
+		window.$modal?.confirm({
+			title: "确认删除角色信息？",
+			content: "此操作不可恢复",
+			onOk: async () => {
+				const ok = await deleteMutation.mutateAsync(ids);
+				if (!ok)
+					return;
+
+				if (action?.reload) {
+					await action.reload();
+				}
+				else {
+					refreshTable();
+					setSelectedRowKeys([]);
+				}
+			},
+		});
+	};
+
+	const columns: ProColumns<System.Role>[] = [
+		...getColumnList(t, {
+			status: (opts) => {
+				// TODO - 自定列
+				return opts.map(opt => ({
+					...opt,
+					label: (
+						<Tag
+							color={opt.value === "0" ? "success" : "error"}
+							children={opt.label}
+						/>
+					),
+				}));
+			},
+		}),
 		{
-			title: t("common.action"),
+			title: "工具栏",
 			valueType: "option",
 			key: "option",
-			width: 120,
+			minWidth: 120,
 			fixed: "right",
-			render: (text, record, _, action) => {
+			disable: true,
+			render: (node, record) => {
 				return [
-					<BasicButton
-						key="editable"
+					<Button
+						key="update"
 						type="link"
 						size="small"
-						disabled={!hasAccessByCodes(accessControlCodes.update)}
-						onClick={async () => {
-							/* 请求角色菜单权限 */
-							const responseData = await fetchMenuByRoleId({ id: record.id });
+						disabled={!hasPerms("system:role:update")}
+						onClick={() => {
+							setItem({ ...record });
 							setIsOpen(true);
-							setTitle(t("system.role.editRole"));
-							setDetailData({ ...record, menus: responseData.result });
+							setTitle("编辑角色");
 						}}
 					>
-						{t("common.edit")}
-					</BasicButton>,
-					<Popconfirm
+						编辑
+					</Button>,
+					<Button
 						key="delete"
-						title={t("common.confirmDelete")}
-						onConfirm={() => handleDeleteRow(record.id, action)}
-						okText={t("common.confirm")}
-						cancelText={t("common.cancel")}
+						type="link"
+						size="small"
+						danger={true}
+						disabled={!hasPerms("system:role:delete")}
+						onClick={() => {
+							handleDeleteRow([record.roleId!]);
+						}}
 					>
-						<BasicButton type="link" size="small" disabled={!hasAccessByCodes(accessControlCodes.delete)}>{t("common.delete")}</BasicButton>
-					</Popconfirm>,
+						删除
+					</Button>,
 				];
 			},
 		},
 	];
 
-	const onCloseChange = () => {
-		setIsOpen(false);
-		setDetailData({});
-	};
-
-	const refreshTable = () => {
-		actionRef.current?.reload();
-	};
 	return (
 		<BasicContent className="h-full">
-			<BasicTable<RoleItemType>
+			<BasicTable<System.Role>
 				adaptive
+				rowKey="roleId"
 				columns={columns}
 				actionRef={actionRef}
+				rowSelection={{
+					selectedRowKeys,
+					onChange: (keys) => {
+						setSelectedRowKeys(keys);
+					},
+				}}
 				request={async (params) => {
-					// console.log(sort, filter);
-					const responseData = await fetchRoleList(params);
+					const response = await api.page(params);
 					return {
-						...responseData,
-						data: responseData.result.list,
-						total: responseData.result.total,
+						...response,
+						data: response.data?.list,
+						total: response.data?.total,
 					};
 				}}
-				headerTitle={`${t("common.menu.role")} （${t("common.demoOnly")}）`}
 				toolBarRender={() => [
 					<Button
-						key="add-role"
-						icon={<PlusCircleOutlined />}
-						type="primary"
-						disabled={!hasAccessByCodes(accessControlCodes.add)}
+						key="delete"
+						icon={<DeleteOutlined />}
+						danger
+						disabled={!hasPerms("system:role:delete")}
 						onClick={() => {
-							setIsOpen(true);
-							setTitle(t("system.role.addRole"));
+							handleDeleteRow([...selectedRowKeys.map(String)]);
 						}}
 					>
-						{t("common.add")}
+						删除
+					</Button>,
+					<Button
+						key="create"
+						icon={<PlusCircleOutlined />}
+						type="primary"
+						disabled={!hasPerms("system:role:create")}
+						onClick={() => {
+							setIsOpen(true);
+							setTitle("创建角色");
+						}}
+					>
+						新增
 					</Button>,
 				]}
 			/>
-			<Detail
+
+			<Edit
+				key={item?.roleId}
 				title={title}
+				roleId={item?.roleId}
 				open={isOpen}
-				onCloseChange={onCloseChange}
-				detailData={detailData}
-				refreshTable={refreshTable}
-				treeData={handleTree(menuItems || [])}
+				onClose={onCloseChange}
 			/>
 		</BasicContent>
 	);
