@@ -11,4 +11,11 @@ export default antfu({
 		"style/jsx-indent-props": ["error", "tab"],
 		"react-hooks/exhaustive-deps": "off",
 	},
+}).append({
+	files: ["src/pages/**"],
+	rules: {
+		"@typescript-eslint/no-unused-vars": "off",
+		"unused-imports/no-unused-vars": "off",
+		"unused-imports/no-unused-imports": "off",
+	},
 });

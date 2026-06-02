@@ -661,8 +661,10 @@ export default function Edit() {
 	const saveGenerateMutation = useMutation({
 		mutationKey: ["saveGenerate"],
 		mutationFn: async (data: any) => {
-			const response = await saveGenerate(data);
-			assert(response);
+			const { code, message } = await saveGenerate(data);
+			if (code !== 200) {
+				throw new Error(message);
+			}
 			window.$message?.success("保存成功");
 			removeTab();
 			setActiveKey("/develop/gen", false);
