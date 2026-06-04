@@ -3,27 +3,41 @@ import type {
 	ProColumns,
 	ProCoreActionType,
 } from "@ant-design/pro-components";
+
 import { DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons";
-
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Button, Tag } from "antd";
-import { createElement, useRef, useState } from "react";
+import { Button } from "antd";
 
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import * as api from "#src/api/system/menu";
+import * as api from "#src/api/system/sqlModel";
 import { BasicContent } from "#src/components/basic-content";
 import { BasicTable } from "#src/components/basic-table";
+
 import { useAccess } from "#src/hooks/use-access";
-
-import { menuIcons } from "#src/icons/menu-icons";
-
-import { handleTree } from "#src/utils/tree";
 import { getColumnList } from "./columns";
 import Edit from "./components/edit";
 
 export default function Page() {
 	const { t } = useTranslation();
 	const { hasPerms } = useAccess();
+	const [isOpen, setIsOpen] = useState(false);
+	const [title, setTitle] = useState("");
+	const [editId, setEditId] = useState<string | number>();
+	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+	const actionRef = useRef<ActionType>(null);
+	const refreshTable = () => {
+		actionRef.current?.reload();
+	};
+
+	const onCloseChange = (refresh?: boolean) => {
+		setIsOpen(false);
+		setEditId(undefined);
+		if (refresh) {
+			refreshTable();
+		}
+	};
 
 	const deleteMutation = useMutation({
 		mutationFn: async (ids: (string | number)[]) => {
@@ -36,37 +50,14 @@ export default function Page() {
 		},
 	});
 
-	const [isOpen, setIsOpen] = useState(false);
-	const [title, setTitle] = useState("");
-	const [menuId, setMenuId] = useState<string | number>();
-	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-
-	const [menuList, setMenuList] = useState<System.Menu[]>([]);
-
-	const actionRef = useRef<ActionType>(null);
-	const refreshTable = () => {
-		actionRef.current?.reload();
-	};
-
-	const onCloseChange = (refresh?: boolean) => {
-		setIsOpen(false);
-		setMenuId(undefined);
-		if (refresh) {
-			refreshTable();
-		}
-	};
-
-	const handleDeleteRow = async (
-		ids: Array<string | number>,
-		action?: ProCoreActionType<object>,
-	) => {
+	const handleDeleteRow = async (ids: Array<string | number>, action?: ProCoreActionType<object>) => {
 		if (!ids || ids.length === 0) {
 			window.$message?.error("请选择要删除的行");
 			return;
 		}
 
 		window.$modal?.confirm({
-			title: "确认删除菜单权限？",
+			title: "确认删除sql模型？",
 			content: "此操作不可恢复",
 			onOk: async () => {
 				const ok = await deleteMutation.mutateAsync(ids);
@@ -84,43 +75,11 @@ export default function Page() {
 		});
 	};
 
-	const columns: ProColumns<System.Menu>[] = [
+	const columns: ProColumns<System.SqlModel>[] = [
 		...getColumnList(t, {
-			menuName: (column) => {
+			XXX: (column) => {
 				// TODO - 自定列
-				return {
-					...column,
-					render(text) {
-						if (typeof text === "string" && text.includes(".")) {
-							return t(text);
-						}
-						return text;
-					},
-				};
-			},
-			status: (column) => {
-				return {
-					...column,
-					render(text) {
-						return (
-							<Tag color={text === "1" ? "error" : "success"} children={text} />
-						);
-					},
-				};
-			},
-			icon: (column) => {
-				return {
-					...column,
-					render(text) {
-						return typeof (text) === "string" && menuIcons[text]
-							? createElement(menuIcons[text], {
-								style: {
-									fontSize: 18,
-								},
-							})
-							: text;
-					},
-				};
+				return column;
 			},
 		}),
 		{
@@ -136,11 +95,11 @@ export default function Page() {
 						key="update"
 						type="link"
 						size="small"
-						disabled={!hasPerms("system:menu:update")}
+						disabled={!hasPerms("system:sqlModel:update")}
 						onClick={() => {
-							setMenuId(record.menuId);
+							setEditId(record.id!);
 							setIsOpen(true);
-							setTitle("编辑菜单权限");
+							setTitle("编辑sql模型");
 						}}
 					>
 						编辑
@@ -150,9 +109,9 @@ export default function Page() {
 						type="link"
 						size="small"
 						danger={true}
-						disabled={!hasPerms("system:menu:delete")}
+						disabled={!hasPerms("system:sqlModel:delete")}
 						onClick={() => {
-							handleDeleteRow([record.menuId!]);
+							handleDeleteRow([record.id!]);
 						}}
 					>
 						删除
@@ -164,29 +123,24 @@ export default function Page() {
 
 	return (
 		<BasicContent className="h-full">
-			<BasicTable<System.Menu>
+			<BasicTable<System.SqlModel>
 				adaptive
-				rowKey="menuId"
+				rowKey="id"
 				columns={columns}
 				actionRef={actionRef}
-				pagination={false}
 				rowSelection={{
 					selectedRowKeys,
-					checkStrictly: false,
 					preserveSelectedRowKeys: true,
 					onChange: (keys) => {
 						setSelectedRowKeys(keys);
 					},
 				}}
 				request={async (params) => {
-					const { code, data, message } = await api.page({ ...params, pageNum: params.current });
-					if (code === 200) {
-						setMenuList(data.filter(it => it.menuType !== "F"));
-					}
+					const response = await api.page({ ...params, pageNum: params.current });
 					return {
-						code,
-						message,
-						data: handleTree(data, "menuId"),
+						...response,
+						data: response.data?.list,
+						total: response.data?.total,
 					};
 				}}
 				toolBarRender={() => [
@@ -194,7 +148,7 @@ export default function Page() {
 						key="delete"
 						icon={<DeleteOutlined />}
 						danger
-						disabled={!hasPerms("system:menu:delete")}
+						disabled={!hasPerms("system:sqlModel:delete")}
 						onClick={() => {
 							handleDeleteRow([...selectedRowKeys.map(String)]);
 						}}
@@ -205,10 +159,10 @@ export default function Page() {
 						key="create"
 						icon={<PlusCircleOutlined />}
 						type="primary"
-						disabled={!hasPerms("system:menu:create")}
+						disabled={!hasPerms("system:sqlModel:create")}
 						onClick={() => {
 							setIsOpen(true);
-							setTitle("创建菜单权限");
+							setTitle("创建sql模型");
 						}}
 					>
 						新增
@@ -217,13 +171,12 @@ export default function Page() {
 			/>
 
 			<Edit
-				key={menuId}
+				key={editId}
 				title={title}
-				menuId={menuId}
-				menuList={menuList}
+				id={editId}
 				open={isOpen}
 				onClose={onCloseChange}
 			/>
 		</BasicContent>
 	);
-}
+};

@@ -93,7 +93,7 @@ export default function Search<T extends Record<string, any>>({ title, width, st
 						},
 						{
 							title: "描述",
-							dataIndex: "desc",
+							dataIndex: "description",
 							search: false,
 						},
 					]}
@@ -101,7 +101,7 @@ export default function Search<T extends Record<string, any>>({ title, width, st
 						if (!request) {
 							return { data: [] };
 						}
-						const resposne = await request(params, sort, filter);
+						const resposne = await request({ ...params, pageNum: params.current }, sort, filter);
 						return resposne;
 					}}
 					rowSelection={{

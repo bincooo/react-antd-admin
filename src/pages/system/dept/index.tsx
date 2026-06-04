@@ -15,7 +15,6 @@ import { useTranslation } from "react-i18next";
 import * as api from "#src/api/system/dept";
 import { BasicContent } from "#src/components/basic-content";
 import { BasicTable } from "#src/components/basic-table";
-import ModalSearch, { ModalSearchProp } from "#src/components/modal-search";
 import { useAccess } from "#src/hooks/use-access";
 
 import { handleTree } from "#src/utils/tree";
@@ -151,6 +150,7 @@ const Page: React.FC = observer(() => {
 				actionRef={actionRef}
 				rowSelection={{
 					selectedRowKeys,
+					preserveSelectedRowKeys: true,
 					onChange: (keys) => {
 						setSelectedRowKeys(keys);
 					},

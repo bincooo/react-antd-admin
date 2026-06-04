@@ -139,12 +139,13 @@ export default function Page() {
 				actionRef={actionRef}
 				rowSelection={{
 					selectedRowKeys,
+					preserveSelectedRowKeys: true,
 					onChange: (keys) => {
 						setSelectedRowKeys(keys);
 					},
 				}}
 				request={async (params) => {
-					const response = await api.page(params);
+					const response = await api.page({ ...params, pageNum: params.current });
 					return {
 						...response,
 						data: response.data?.list,

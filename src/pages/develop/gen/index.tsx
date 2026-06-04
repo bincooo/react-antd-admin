@@ -251,12 +251,13 @@ export default function GenTable() {
 				actionRef={actionRef}
 				rowSelection={{
 					selectedRowKeys,
+					preserveSelectedRowKeys: true,
 					onChange: (keys) => {
 						setSelectedRowKeys(keys);
 					},
 				}}
 				request={async (params) => {
-					const responseData = await fetchList(params);
+					const responseData = await fetchList({ ...params, pageNum: params.current });
 					return {
 						...responseData,
 						data: responseData.data.list,

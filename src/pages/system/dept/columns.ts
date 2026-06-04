@@ -4,8 +4,7 @@ import type { TFunction } from "i18next";
  * 由后台配置生成，不可手工修改
  */
 import type { JSX } from "react";
-
-import * as userApi from "#src/api/system/user";
+import { executeSql } from "#src/api/common";
 
 interface DictData {
 	label: string | JSX.Element
@@ -65,10 +64,10 @@ export function getColumnList(
 				// search: false,
 				proFieldProps: {
 					request: async (query: any) => {
-						const response = await userApi.page(query);
+						const response = await executeSql("2062586130975002626", query);
 						return {
 							...response,
-							data: response.data.list.map(it => ({ id: it.userId, code: it.phonenumber, name: it.userName })),
+							data: response.data.list,
 							total: response.data.total,
 						};
 					},

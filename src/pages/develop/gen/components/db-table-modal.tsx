@@ -81,6 +81,7 @@ export default function DbTableModal({ open, dataNames, onCloseChange, refreshTa
 				columns={columns}
 				rowSelection={{
 					selectedRowKeys,
+					preserveSelectedRowKeys: true,
 					onChange: (keys) => {
 						setSelectedRowKeys(keys);
 					},
@@ -112,7 +113,7 @@ export default function DbTableModal({ open, dataNames, onCloseChange, refreshTa
 					</Button>,
 				]}
 				request={async (params) => {
-					const response = await fetchDbList(params);
+					const response = await fetchDbList({ ...params, pageNum: params.current });
 					return {
 						...response,
 						data: response.data.list,

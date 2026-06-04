@@ -46,11 +46,3 @@ export function deleteByIds(ids: Array<number | string>) {
 		.delete<ApiResponse<void>>(`system/dept/${ids.join(",")}`)
 		.json();
 }
-
-export function dictTypes(types: string[]) {
-	return request
-		.get<
-		ApiResponse<Record<string, { dictLabel: string, dictValue: string }[]>>
-	>(`system/dict/data/types/${types.join(",")}`)
-		.json();
-}
