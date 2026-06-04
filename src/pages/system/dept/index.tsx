@@ -5,28 +5,30 @@ import type {
 } from "@ant-design/pro-components";
 
 import type { SelectProps } from "antd";
-import { DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons";
+import { DeleteOutlined, PlusCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button, Tag } from "antd";
+import { observer } from "mobx-react-lite";
 
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import * as api from "#src/api/system/dept";
 import { BasicContent } from "#src/components/basic-content";
 import { BasicTable } from "#src/components/basic-table";
+import ModalSearch, { ModalSearchProp } from "#src/components/modal-search";
 import { useAccess } from "#src/hooks/use-access";
 
 import { handleTree } from "#src/utils/tree";
 import { getColumnList } from "./columns";
 import Edit from "./components/edit";
+import stateCtx from "./mobx";
 
-export default function Page() {
+const Page: React.FC = observer(() => {
 	const { t } = useTranslation();
 	const { hasPerms } = useAccess();
-	const [isOpen, setIsOpen] = useState(false);
-	const [title, setTitle] = useState("");
-	const [editId, setEditId] = useState<string | number>();
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+	const [deptList, setDeptList] = useState<System.Dept[]>([]);
+	const context = useContext(stateCtx);
 
 	const actionRef = useRef<ActionType>(null);
 	const refreshTable = () => {
@@ -34,8 +36,8 @@ export default function Page() {
 	};
 
 	const onCloseChange = (refresh?: boolean) => {
-		setIsOpen(false);
-		setEditId(undefined);
+		context.setEditFormVisible(false);
+		context.setEditId();
 		if (refresh) {
 			refreshTable();
 		}
@@ -116,9 +118,9 @@ export default function Page() {
 						size="small"
 						disabled={!hasPerms("system:dept:update")}
 						onClick={() => {
-							setEditId(record.deptId!);
-							setIsOpen(true);
-							setTitle("编辑部门");
+							context.setEditId(record.deptId!);
+							context.setEditFormVisible(true);
+							context.setTitle("编辑部门");
 						}}
 					>
 						编辑
@@ -153,8 +155,12 @@ export default function Page() {
 						setSelectedRowKeys(keys);
 					},
 				}}
+				pagination={false}
 				request={async (params) => {
 					const response = await api.list(params);
+					if (response.code === 200) {
+						setDeptList(response.data);
+					}
 					return {
 						...response,
 						data: handleTree(response.data, "deptId"),
@@ -178,8 +184,8 @@ export default function Page() {
 						type="primary"
 						disabled={!hasPerms("system:dept:create")}
 						onClick={() => {
-							setIsOpen(true);
-							setTitle("创建部门");
+							context.setEditFormVisible(true);
+							context.setTitle("创建部门");
 						}}
 					>
 						新增
@@ -188,12 +194,14 @@ export default function Page() {
 			/>
 
 			<Edit
-				key={editId}
-				title={title}
-				deptId={editId}
-				open={isOpen}
+				title={context.title}
+				deptId={context.editId}
+				deptList={deptList}
+				open={context.editFormVisible}
 				onClose={onCloseChange}
 			/>
 		</BasicContent>
 	);
-}
+});
+
+export default Page;

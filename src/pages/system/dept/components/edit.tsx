@@ -3,17 +3,19 @@ import {
 	ProFormDigit,
 	ProFormRadio,
 	ProFormText,
+	ProFormTreeSelect,
 } from "@ant-design/pro-components";
 import { useMutation, useQueries } from "@tanstack/react-query";
 import { Form } from "antd";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import * as api from "#src/api/system/dept";
-import { useMutative } from "#src/utils/model";
+import { handleTree } from "#src/utils/tree";
 
 interface EditProps {
 	title?: string
 	deptId?: string | number
+	deptList: System.Dept[]
 	dictMap?: {
 		[k: string]: {
 			label: string
@@ -25,13 +27,9 @@ interface EditProps {
 	onClose?: (refresh?: boolean) => void
 }
 
-export default function Edit({ deptId, open = true, onClose, ...props }: EditProps) {
+export default function Edit({ deptId, deptList, open = true, onClose, ...props }: EditProps) {
 	const { t } = useTranslation();
 	const [form] = Form.useForm<System.Dept>();
-	const [model, updateModel] = useMutative({
-		// TODO -
-	});
-
 	const isDisabled = (command: string[]) => {
 		if (command.includes("insert") && !deptId) {
 			return false;
@@ -127,8 +125,38 @@ export default function Edit({ deptId, open = true, onClose, ...props }: EditPro
 			onFinish={onFinish}
 			initialValues={{
 				status: "0",
+				parentId: 0,
 			}}
 		>
+			<ProFormTreeSelect
+				name="parentId"
+				label="上级菜单"
+				placeholder="请输入上级菜单"
+				allowClear={false}
+				rules={[{ required: true }]}
+				request={async () => {
+					const arr = deptId ? [deptId] : [];
+					const data = deptList.filter((i) => {
+						if (arr.includes(i.deptId!)) {
+							return false;
+						}
+						if (arr.includes(i.parentId!)) {
+							arr.push(i.deptId!);
+							return false;
+						}
+						return true;
+					}).map(it => ({
+						title: it.deptName?.includes(".") ? t(it.deptName) : it.deptName,
+						value: it.deptId,
+						parentId: it.parentId,
+					}));
+					return [{
+						title: "根部门",
+						value: "0",
+						children: handleTree(data, "value"),
+					}];
+				}}
+			/>
 			<ProFormText
 				name="deptName"
 				label="部门名称"

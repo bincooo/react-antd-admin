@@ -1,10 +1,10 @@
 import type { BreadcrumbProps } from "antd";
 
-import { isString } from "#src/utils/is";
-
 import { Breadcrumb } from "antd";
+
 import { useTranslation } from "react-i18next";
 import { useMatches } from "react-router";
+import { isString } from "#src/utils/is";
 
 const itemRender: BreadcrumbProps["itemRender"] = (route, params, routes) => {
 	const last = routes.indexOf(route) === routes.length - 1;
@@ -25,7 +25,7 @@ export function BreadcrumbViews() {
 	return (
 		<Breadcrumb
 			className="hidden md:block"
-			separator="->"
+			separator="/"
 			// https://ant.design/components/breadcrumb#use-with-browserhistory
 			itemRender={itemRender}
 			items={matches

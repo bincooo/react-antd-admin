@@ -5,6 +5,8 @@ import type { TFunction } from "i18next";
  */
 import type { JSX } from "react";
 
+import * as userApi from "#src/api/system/user";
+
 interface DictData {
 	label: string | JSX.Element
 	value: string | number
@@ -59,9 +61,21 @@ export function getColumnList(
 			{
 				title: "负责人",
 				dataIndex: "leader",
-				search: false,
+				valueType: "modalSearch" as any,
+				// search: false,
 				proFieldProps: {
+					request: async (query: any) => {
+						const response = await userApi.page(query);
+						return {
+							...response,
+							data: response.data.list.map(it => ({ id: it.userId, code: it.phonenumber, name: it.userName })),
+							total: response.data.total,
+						};
+					},
+				},
+				fieldProps: {
 					placeholder: "请输入负责人",
+					defaultValue: 0,
 				},
 			},
 			{

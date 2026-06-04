@@ -632,8 +632,19 @@ export default function Edit({
 				placeholder="请输入上级菜单"
 				allowClear={false}
 				rules={[{ required: true }]}
+				disabled={menuType === "F"}
 				request={async () => {
-					const data = menuList.map(it => ({
+					const arr = menuId ? [menuId] : [];
+					const data = menuList.filter((i) => {
+						if (arr.includes(i.menuId!)) {
+							return false;
+						}
+						if (arr.includes(i.parentId!)) {
+							arr.push(i.menuId!);
+							return false;
+						}
+						return true;
+					}).map(it => ({
 						title: it.menuName?.includes(".") ? t(it.menuName) : it.menuName,
 						value: it.menuId,
 						parentId: it.parentId,
@@ -663,6 +674,7 @@ export default function Edit({
 				label="菜单类型"
 				placeholder="请选择菜单类型"
 				readonly={isDisabled(["insert", "edit"])}
+				disabled={!!menuId}
 				options={[
 					{ value: "M", label: "目录" },
 					{ value: "C", label: "菜单" },
@@ -833,11 +845,12 @@ export default function Edit({
 					form.setFieldValue("icon", iconSelected);
 					setIconModalVisable(false);
 				}}
-				style={{
-					minHeight: 600,
-				}}
+
 				onCancel={() => setIconModalVisable(false)}
-				width="75%"
+				width="90%"
+				style={{
+					maxWidth: "1200px",
+				}}
 				styles={{
 					body: {
 						minHeight: 600,
