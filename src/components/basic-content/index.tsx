@@ -7,10 +7,11 @@ interface Props {
 }
 
 export function BasicContent(props: Props) {
-	const { children, className, style } = props;
+	const { children, className, style, ...rest } = props;
 
 	return (
 		<div
+			{...rest}
 			id="basic-content"
 			/**
 			 * 1. 当 children 的高度过高，设置了 p-4 样式，就不能设置了 h-full，防止底部的 padding-bottom 不出现。

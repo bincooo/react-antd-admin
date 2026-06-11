@@ -50,7 +50,10 @@ export default function Page() {
 		},
 	});
 
-	const handleDeleteRow = async (ids: Array<string | number>, action?: ProCoreActionType<object>) => {
+	const handleDeleteRow = async (
+		ids: Array<string | number>,
+		action?: ProCoreActionType<object>,
+	) => {
 		if (!ids || ids.length === 0) {
 			window.$message?.error("请选择要删除的行");
 			return;
@@ -136,7 +139,10 @@ export default function Page() {
 					},
 				}}
 				request={async (params) => {
-					const response = await api.page({ ...params, pageNum: params.current });
+					const response = await api.page({
+						...params,
+						pageNum: params.current,
+					});
 					return {
 						...response,
 						data: response.data?.list,
@@ -179,4 +185,4 @@ export default function Page() {
 			/>
 		</BasicContent>
 	);
-};
+}

@@ -1,14 +1,16 @@
 import {
 	DrawerForm,
+	ProFormSelect,
 	ProFormText,
 	ProFormTextArea,
 } from "@ant-design/pro-components";
 import { useMutation, useQueries } from "@tanstack/react-query";
 import { Form } from "antd";
+import { observer, useLocalObservable } from "mobx-react-lite";
 import { useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import * as api from "#src/api/system/sqlModel";
-import stateCtx from "../mobx/edit";
+import createState from "../mobx/edit";
 
 interface EditProps {
 	title?: string
@@ -24,10 +26,10 @@ interface EditProps {
 	onClose?: (refresh?: boolean) => void
 }
 
-export default function Edit({ id, open = true, onClose, ...props }: EditProps) {
+export default observer(({ id, open = true, onClose, ...props }: EditProps) => {
 	const { t } = useTranslation();
 	const [form] = Form.useForm<System.SqlModel>();
-	const context = useContext(stateCtx);
+	const context = useLocalObservable(createState({ id }));
 
 	const [sqlModelData] = useQueries({
 		queries: [
@@ -84,6 +86,7 @@ export default function Edit({ id, open = true, onClose, ...props }: EditProps) 
 		if (open) {
 			if (sqlModelData.data) {
 				form.setFieldsValue(sqlModelData.data);
+				context.update(sqlModelData.data);
 				return;
 			}
 			form.resetFields();
@@ -93,15 +96,11 @@ export default function Edit({ id, open = true, onClose, ...props }: EditProps) 
 	return (
 		<DrawerForm<System.SqlModel>
 			{...props}
-			open={open}
+			onValuesChange={changed => context.update(changed)}
 			onOpenChange={(visible) => {
 				if (visible === false) {
 					onClose?.();
 				}
-			}}
-			resize={{
-				maxWidth: window.innerWidth * 0.8,
-				minWidth: 600,
 			}}
 			labelCol={{ span: 8 }}
 			wrapperCol={{ span: 24 }}
@@ -115,27 +114,41 @@ export default function Edit({ id, open = true, onClose, ...props }: EditProps) 
 			initialValues={{
 				status: "0",
 			}}
+			resize={true}
+			width="600px"
+			open={open}
 		>
-			<ProFormTextArea
-				name="sqlText"
-				label="sql语句"
-				placeholder="请输入sql语句"
-				readonly={context.isDisabled(["insert", "edit"])}
-				allowClear={false}
-				rules={[
-					{ required: true },
-				]}
-			/>
 			<ProFormText
 				name="name"
 				label="模型名称"
 				placeholder="请输入模型名称"
 				readonly={context.isDisabled(["insert", "edit"])}
 				allowClear={false}
-				rules={[
-					{ required: true },
+				rules={[{ required: true }]}
+			/>
+
+			<ProFormSelect
+				name="javaType"
+				label="主键类型"
+				placeholder="请选择主键类型"
+				readonly={context.isDisabled(["insert", "edit"])}
+				allowClear={false}
+				rules={[{ required: true }]}
+				options={[
+					{ value: "0", label: "数值" },
+					{ value: "1", label: "字符" },
 				]}
 			/>
+
+			<ProFormTextArea
+				name="sqlText"
+				label="sql语句"
+				placeholder="请输入sql语句"
+				readonly={context.isDisabled(["insert", "edit"])}
+				allowClear={false}
+				rules={[{ required: true }]}
+			/>
+
 			<ProFormTextArea
 				name="description"
 				label="模型描述"
@@ -145,4 +158,4 @@ export default function Edit({ id, open = true, onClose, ...props }: EditProps) 
 			/>
 		</DrawerForm>
 	);
-};
+});

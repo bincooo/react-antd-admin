@@ -40,18 +40,33 @@ export function getColumnList(t: TFunction<"translation", undefined>, options?: 
 			},
 		},
 		{
+			title: "模型名称",
+			dataIndex: "name",
+			proFieldProps: {
+				placeholder: "请输入模型名称",
+			},
+		},
+		{
+			title: "主键类型",
+			dataIndex: "javaType",
+			search: false,
+			proFieldProps: {
+				placeholder: "请输入主键类型",
+			},
+			valueType: "select",
+			fieldProps: {
+				options: [
+					{ value: "0", label: "数值" },
+					{ value: "1", label: "字符" },
+				],
+			},
+		},
+		{
 			title: "sql语句",
 			dataIndex: "sqlText",
 			search: false,
 			proFieldProps: {
 				placeholder: "请输入sql语句",
-			},
-		},
-		{
-			title: "模型名称",
-			dataIndex: "name",
-			proFieldProps: {
-				placeholder: "请输入模型名称",
 			},
 		},
 		{

@@ -63,14 +63,7 @@ export function getColumnList(
 				valueType: "modalSearch" as any,
 				// search: false,
 				proFieldProps: {
-					request: async (query: any) => {
-						const response = await executeSql("2062586130975002626", query);
-						return {
-							...response,
-							data: response.data.list,
-							total: response.data.total,
-						};
-					},
+					searchId: "2062586130975002626",
 				},
 				fieldProps: {
 					placeholder: "请输入负责人",

@@ -7,14 +7,19 @@ declare namespace System {
 		id?: string | number
 
 		/**
-		 * sql语句
-		 */
-		sqlText?: string
-
-		/**
 		 * 模型名称
 		 */
 		name?: string
+
+		/**
+		 * 主键类型（0数值 1字符）
+		 */
+		javaType?: string
+
+		/**
+		 * sql语句
+		 */
+		sqlText?: string
 
 		/**
 		 * 模型描述
@@ -45,6 +50,11 @@ declare namespace System {
 		 * $column.columnComment
 		 */
 		tenantId?: string | number
+
+		/**
+		 * $column.columnComment
+		 */
+		createDept?: number
 
 	}
 

@@ -1,22 +1,31 @@
+import equal from "fast-deep-equal";
 import { action, computed, makeObservable, observable } from "mobx";
-import { createContext } from "react";
 
 class State {
-	@observable
-	id?: string | number;
+	private readonly _initialize: System.SqlModel;
 
-	constructor() {
+	@observable
+	data: System.SqlModel = {};
+
+	constructor(initialize: System.SqlModel) {
+		this._initialize = initialize;
+		this.data = { ...initialize };
 		makeObservable(this);
 	}
 
 	@action
-	setId(id?: string | number) {
-		this.id = id;
+	update(changed: System.SqlModel) {
+		Object.assign(this.data, changed);
+	}
+
+	@computed
+	get changed() {
+		return !equal(this._initialize, this.data);
 	}
 
 	@computed
 	get isEdit() {
-		return !!this.id;
+		return !!this.data.id;
 	}
 
 	isDisabled(command: string[]) {
@@ -30,4 +39,6 @@ class State {
 	}
 }
 
-export default createContext(new State());
+export default function createState(initialize: System.SqlModel) {
+	return () => (new State(initialize));
+};

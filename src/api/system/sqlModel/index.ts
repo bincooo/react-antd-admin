@@ -40,3 +40,7 @@ export function update(data: System.SqlModel) {
 export function deleteByIds(ids: Array<number | string>) {
 	return request.delete<ApiResponse<void>>(`system/sqlModel/${ids.join(",")}`).json();
 }
+
+export function dictTypes(types: string[]) {
+	return request.get<ApiResponse<Record<string, { dictLabel: string, dictValue: string }[]>>>(`system/dict/data/types/${types.join(",")}`).json();
+}

@@ -16,14 +16,12 @@ const globalValueTypeMap: Record<string, ProRenderFieldPropsType> = {
 			{ fieldProps, ...props }: ProFieldFCRenderProps,
 		) => {
 			const { title, ...rest } = fieldProps;
-			const { request } = props as any;
+			const { searchId } = props as any;
 			return (
 				<ModalSearch
 					{...rest}
 					title={title}
-					style={{ maxWidth: "900px" }}
-					width="95%"
-					request={request}
+					searchId={searchId}
 				/>
 			);
 		},

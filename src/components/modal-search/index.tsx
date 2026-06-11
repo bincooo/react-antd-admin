@@ -1,13 +1,11 @@
-import type {
-	ProTableProps,
-} from "@ant-design/pro-components";
 import { SearchOutlined } from "@ant-design/icons";
-
 import {
 	ProTable,
 } from "@ant-design/pro-components";
+
 import { Input, Modal } from "antd";
 import { useEffect, useState } from "react";
+import { executeSql } from "#src/api/common";
 
 export interface ModalSearchProp<T> extends Record<string, any> {
 	title?: string
@@ -15,24 +13,39 @@ export interface ModalSearchProp<T> extends Record<string, any> {
 	style?: React.CSSProperties
 	placeholder?: string
 	defaultValue?: number | string
+	searchId?: string
+	value?: T
 
-	request?: ProTableProps<T, any>["request"]
-	onChange: (value?: any) => void
+	// request?: ProTableProps<T, any>["request"]
+	onChange?: (value?: any) => void
 };
 
-export default function Search<T extends Record<string, any>>({ title, width, style, defaultValue, onChange, request, ...rest }: ModalSearchProp<T>) {
+async function request(id: string, query?: any) {
+	const response = await executeSql(id, query);
+	return {
+		...response,
+		data: response.data.list,
+		total: response.data.total,
+	};
+}
+
+export default function Search<T extends Record<string, any>>({ title, width = "95%", style = { maxWidth: "900px" }, value: _value, defaultValue, searchId, onChange, ...rest }: ModalSearchProp<T>) {
+	if (!style.maxWidth) {
+		style.maxWidth = "900px";
+	}
 	const [modalVisible, setModalVisible] = useState(false);
 	const [value, setValue] = useState<{ value?: string | number, text?: string }>({});
 	const [row, setRow] = useState<T>();
 	useEffect(() => {
-		if (request && !!defaultValue) {
-			request({ id: defaultValue }, {}, {}).then((res) => {
+		const id = _value || defaultValue;
+		if (searchId && !!id) {
+			request(searchId, { id }).then((res) => {
 				if (res.data && res.data.length > 0) {
 					setValue({ value: res.data[0].id, text: res.data[0].name });
 				}
 			});
 		}
-	}, [defaultValue]);
+	}, [defaultValue, _value]);
 	return (
 		<>
 			<Input
@@ -97,12 +110,11 @@ export default function Search<T extends Record<string, any>>({ title, width, st
 							search: false,
 						},
 					]}
-					request={async (params, sort, filter) => {
-						if (!request) {
+					request={async (params) => {
+						if (!searchId) {
 							return { data: [] };
 						}
-						const resposne = await request({ ...params, pageNum: params.current }, sort, filter);
-						return resposne;
+						return await request(searchId, { ...params, pageNum: params.current });
 					}}
 					rowSelection={{
 						type: "radio",

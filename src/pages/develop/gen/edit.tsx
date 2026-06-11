@@ -2,6 +2,7 @@ import type {
 
 	TablePaginationConfig,
 } from "antd";
+import { DragSortTable } from "@ant-design/pro-components";
 import { useMutation, useQueries } from "@tanstack/react-query";
 import {
 	Button,
@@ -18,7 +19,6 @@ import {
 	Select,
 	Space,
 	Spin,
-	Table,
 	Tabs,
 	theme,
 
@@ -188,31 +188,34 @@ function BaseInfo({ style }: any) {
 
 function FieldInfo({ dictList, dataSource }: any) {
 	const { t } = useTranslation();
-	const [pagination, setPagination] = useState<TablePaginationConfig>({
-		current: 1,
-		pageSize: 50,
-		placement: ["bottomStart"],
-		size: "small",
-		showSizeChanger: true,
-		pageSizeOptions: ["50", "100"],
-		showTotal: (total) => {
-			return t("common.pagination", { total });
-		},
-	});
+	const form = Form.useFormInstance();
+	const [data, setData] = useState(dataSource);
 	const idIndexMap = useMemo(() => {
 		const m = new Map<any, number>();
-		dataSource.forEach((r: any, i: number) => m.set(r.columnId, i));
+		data.forEach((r: any, i: number) => m.set(r.columnId, i));
 		return m;
-	}, [dataSource]);
+	}, [data]);
 	const checkboxItemProps = (namePath: (string | number)[]) => ({
 		name: namePath,
 		valuePropName: "checked" as const,
 		getValueProps: (v: any) => ({ checked: v === true || v === 1 || v === "1" }),
 		getValueFromEvent: (e: any) => (e.target.checked ? "1" : "0"),
 	});
+	const handleDragSortEnd = (
+		beforeIndex: number,
+		afterIndex: number,
+		newDataSource: any[],
+	) => {
+		const updated = newDataSource.map((item, index) => ({
+			...item,
+			sort: index + 1,
+		}));
+		setData(updated);
+		form.setFieldValue("columns", updated);
+	};
 
 	return (
-		<Table
+		<DragSortTable
 			rowKey="columnId"
 			styles={{
 				body: {
@@ -220,24 +223,31 @@ function FieldInfo({ dictList, dataSource }: any) {
 				},
 			}}
 			scroll={{ y: "calc(100vh - 511px)", x: "max-content" }}
-			dataSource={dataSource}
-			pagination={pagination}
-			onChange={p => setPagination({ ...pagination, current: p.current!, pageSize: p.pageSize! })}
+			dataSource={data}
+			pagination={false}
+			toolBarRender={false}
+			dragSortKey="sort"
+			onDragSortEnd={handleDragSortEnd}
+			search={false}
 			columns={[
 				{
-					title: "序号",
-					render: (_: any, __: any, index: number) => (pagination.current! - 1) * pagination.pageSize! + index + 1,
-					width: 70,
+					title: "排序",
+					dataIndex: "sort",
+					width: 60,
+					className: "drag-visible",
+					search: false,
 				},
 				{
 					title: "字段列名",
 					dataIndex: "columnName",
 					width: 180,
+					search: false,
 				},
 				{
 					title: "字段描述",
 					dataIndex: "columnComment",
 					minWidth: 230,
+					search: false,
 					render: (_: any, record: any) => {
 						const i = idIndexMap.get(record.columnId);
 						if (i === undefined)
@@ -253,6 +263,7 @@ function FieldInfo({ dictList, dataSource }: any) {
 					title: "JAVA属性",
 					dataIndex: "javaField",
 					minWidth: 230,
+					search: false,
 					render: (_: any, record: any) => {
 						const i = idIndexMap.get(record.columnId);
 						if (i === undefined)
@@ -268,11 +279,13 @@ function FieldInfo({ dictList, dataSource }: any) {
 					title: "字段类型",
 					dataIndex: "columnType",
 					width: 90,
+					search: false,
 				},
 				{
 					title: "JAVA类型",
 					dataIndex: "javaType",
 					width: 120,
+					search: false,
 					render: (_: any, record: any) => {
 						const i = idIndexMap.get(record.columnId);
 						if (i === undefined)
@@ -293,6 +306,7 @@ function FieldInfo({ dictList, dataSource }: any) {
 					dataIndex: "isInsert",
 					width: 60,
 					align: "center",
+					search: false,
 					render: (_: any, record: any) => {
 						const i = idIndexMap.get(record.columnId);
 						if (i === undefined)
@@ -311,6 +325,7 @@ function FieldInfo({ dictList, dataSource }: any) {
 					dataIndex: "isEdit",
 					width: 60,
 					align: "center",
+					search: false,
 					render: (_: any, record: any) => {
 						const i = idIndexMap.get(record.columnId);
 						if (i === undefined)
@@ -328,6 +343,7 @@ function FieldInfo({ dictList, dataSource }: any) {
 					title: "列表",
 					dataIndex: "isList",
 					width: 60,
+					search: false,
 					render: (_: any, record: any) => {
 						const i = idIndexMap.get(record.columnId);
 						if (i === undefined)
@@ -345,6 +361,7 @@ function FieldInfo({ dictList, dataSource }: any) {
 					title: "查询",
 					dataIndex: "isQuery",
 					width: 60,
+					search: false,
 					render: (_: any, record: any) => {
 						const i = idIndexMap.get(record.columnId);
 						if (i === undefined)
@@ -362,6 +379,7 @@ function FieldInfo({ dictList, dataSource }: any) {
 					title: "查询方式",
 					dataIndex: "queryType",
 					width: 100,
+					search: false,
 					render: (_: any, record: any) => {
 						const i = idIndexMap.get(record.columnId);
 						if (i === undefined)
@@ -381,6 +399,7 @@ function FieldInfo({ dictList, dataSource }: any) {
 					title: "必填",
 					dataIndex: "isRequired",
 					width: 60,
+					search: false,
 					render: (_: any, record: any) => {
 						const i = idIndexMap.get(record.columnId);
 						if (i === undefined)
@@ -398,6 +417,7 @@ function FieldInfo({ dictList, dataSource }: any) {
 					title: "显示类型",
 					dataIndex: "htmlType",
 					width: 120,
+					search: false,
 					render: (_: any, record: any) => {
 						const i = idIndexMap.get(record.columnId);
 						if (i === undefined)
@@ -417,6 +437,7 @@ function FieldInfo({ dictList, dataSource }: any) {
 					title: "字典类型",
 					dataIndex: "dictType",
 					width: 160,
+					search: false,
 					render: (_: any, record: any) => {
 						const i = idIndexMap.get(record.columnId);
 						if (i === undefined)
