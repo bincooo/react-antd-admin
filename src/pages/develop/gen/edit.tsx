@@ -82,6 +82,8 @@ const htmlTypeOptions = [
 	{ value: "datetime", label: "日期时间" },
 	{ value: "imageUpload", label: "图片上传" },
 	{ value: "fileUpload", label: "文件上传" },
+	{ value: "modalSearch", label: "模态选择" },
+	{ value: "codeMirror", label: "代码编辑" },
 	{ value: "editor", label: "富文本" },
 ];
 

@@ -3,13 +3,13 @@ import {
 	ProTable,
 } from "@ant-design/pro-components";
 
-import { Input, Modal } from "antd";
+import { Form, Input, Modal } from "antd";
 import { useEffect, useState } from "react";
 import { executeSql } from "#src/api/common";
 
 export interface ModalSearchProp<T> extends Record<string, any> {
 	title?: string
-	width?: string
+	width?: string | number
 	style?: React.CSSProperties
 	placeholder?: string
 	defaultValue?: number | string
@@ -29,23 +29,55 @@ async function request(id: string, query?: any) {
 	};
 }
 
-export default function Search<T extends Record<string, any>>({ title, width = "95%", style = { maxWidth: "900px" }, value: _value, defaultValue, searchId, onChange, ...rest }: ModalSearchProp<T>) {
+function ProModalSearchField<T,>({ width, readonly, placeholder, searchId, name, label, allowClear, required, disabled, fieldProps, ...rest }: {
+	searchId?: string
+	name?: string
+	label?: string
+	fieldProps?: ModalSearchProp<T>
+	placeholder?: string
+	disabled?: boolean
+	readonly?: boolean
+	required?: boolean
+	width?: number | string | "xl" | "lg" | "md" | "sm" | "xs" | undefined
+	allowClear?: boolean
+}) {
+	return (
+		<Form.Item label={label} name={name} required={required} {...rest}>
+			<ModalSearchField<T>
+				searchId={searchId}
+				allowClear={allowClear}
+				width={width}
+				placeholder={placeholder}
+				readonly={readonly}
+				disabled={disabled}
+				{...fieldProps}
+			/>
+		</Form.Item>
+	);
+}
+
+function ModalSearchField<T,>({ title, width = "95%", style = { maxWidth: "900px" }, value: _value, defaultValue, searchId, readonly = false, onChange, ...rest }: ModalSearchProp<T>) {
 	if (!style.maxWidth) {
 		style.maxWidth = "900px";
 	}
 	const [modalVisible, setModalVisible] = useState(false);
-	const [value, setValue] = useState<{ value?: string | number, text?: string }>({});
-	const [row, setRow] = useState<T>();
+	const [value, setValue] = useState<{ value?: string | number, name?: string }>({});
+	const [row, setRow] = useState<Record<string, any>>();
 	useEffect(() => {
 		const id = _value || defaultValue;
 		if (searchId && !!id) {
 			request(searchId, { id }).then((res) => {
 				if (res.data && res.data.length > 0) {
-					setValue({ value: res.data[0].id, text: res.data[0].name });
+					setValue({ value: res.data[0].id, name: res.data[0].name });
 				}
 			});
 		}
 	}, [defaultValue, _value]);
+
+	if (readonly) {
+		return <span>{value.name || "-"}</span>;
+	}
+
 	return (
 		<>
 			<Input
@@ -59,7 +91,7 @@ export default function Search<T extends Record<string, any>>({ title, width = "
 						}}
 					/>
 				)}
-				value={value?.text}
+				value={value?.name}
 				onClear={() => {
 					setValue({});
 					onChange?.();
@@ -77,13 +109,13 @@ export default function Search<T extends Record<string, any>>({ title, width = "
 				onCancel={() => setModalVisible(false)}
 				onOk={() => {
 					if (row) {
-						setValue({ value: row.id, text: row.name });
+						setValue({ value: row.id, name: row.name });
 						onChange?.(row.id);
 					}
 					setModalVisible(false);
 				}}
 			>
-				<ProTable<T>
+				<ProTable
 					{...rest}
 					rowKey="id"
 					size="small"
@@ -118,7 +150,7 @@ export default function Search<T extends Record<string, any>>({ title, width = "
 					}}
 					rowSelection={{
 						type: "radio",
-						onSelect(record: T, selected: boolean) {
+						onSelect(record: Record<string, any>, selected: boolean) {
 							if (selected) {
 								setRow(record);
 							}
@@ -129,3 +161,6 @@ export default function Search<T extends Record<string, any>>({ title, width = "
 		</>
 	);
 }
+
+export default ModalSearchField;
+export { ProModalSearchField };

@@ -6,10 +6,13 @@ import {
 } from "@ant-design/pro-components";
 import { useMutation, useQueries } from "@tanstack/react-query";
 import { Form } from "antd";
+
 import { observer, useLocalObservable } from "mobx-react-lite";
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+
 import * as api from "#src/api/system/sqlModel";
+import { ProCodeMirrorField } from "#src/components/code-mirror";
 import createState from "../mobx/edit";
 
 interface EditProps {
@@ -31,6 +34,7 @@ export default observer(({ id, open = true, onClose, ...props }: EditProps) => {
 	const [form] = Form.useForm<System.SqlModel>();
 	const context = useLocalObservable(createState({ id }));
 
+	/** 加载数据 */
 	const [sqlModelData] = useQueries({
 		queries: [
 			{
@@ -46,6 +50,7 @@ export default observer(({ id, open = true, onClose, ...props }: EditProps) => {
 		],
 	});
 
+	/** 创建接口 */
 	const createMutation = useMutation({
 		mutationFn: async (data: System.SqlModel) => {
 			const { code, message } = await api.create(data);
@@ -56,6 +61,7 @@ export default observer(({ id, open = true, onClose, ...props }: EditProps) => {
 		},
 	});
 
+	/** 更新接口 */
 	const updateMutation = useMutation({
 		mutationFn: async (data: System.SqlModel) => {
 			const { code, message } = await api.update(data);
@@ -96,12 +102,15 @@ export default observer(({ id, open = true, onClose, ...props }: EditProps) => {
 	return (
 		<DrawerForm<System.SqlModel>
 			{...props}
+			open={open}
 			onValuesChange={changed => context.update(changed)}
 			onOpenChange={(visible) => {
 				if (visible === false) {
 					onClose?.();
 				}
 			}}
+			width="600px"
+			resize={true}
 			labelCol={{ span: 8 }}
 			wrapperCol={{ span: 24 }}
 			layout="horizontal"
@@ -114,9 +123,6 @@ export default observer(({ id, open = true, onClose, ...props }: EditProps) => {
 			initialValues={{
 				status: "0",
 			}}
-			resize={true}
-			width="600px"
-			open={open}
 		>
 			<ProFormText
 				name="name"
@@ -140,12 +146,12 @@ export default observer(({ id, open = true, onClose, ...props }: EditProps) => {
 				]}
 			/>
 
-			<ProFormTextArea
+			<ProCodeMirrorField
 				name="sqlText"
 				label="sql语句"
 				placeholder="请输入sql语句"
 				readonly={context.isDisabled(["insert", "edit"])}
-				allowClear={false}
+				language="sql"
 				rules={[{ required: true }]}
 			/>
 

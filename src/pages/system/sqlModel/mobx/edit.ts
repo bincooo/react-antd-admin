@@ -1,6 +1,9 @@
 import equal from "fast-deep-equal";
 import { action, computed, makeObservable, observable } from "mobx";
 
+/**
+ * 编辑页状态管理
+ */
 class State {
 	private readonly _initialize: System.SqlModel;
 
@@ -13,7 +16,6 @@ class State {
 		makeObservable(this);
 	}
 
-	@action
 	update(changed: System.SqlModel) {
 		Object.assign(this.data, changed);
 	}

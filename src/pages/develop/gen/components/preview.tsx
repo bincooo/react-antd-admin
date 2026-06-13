@@ -1,15 +1,8 @@
-import type { Extension } from "@codemirror/state";
-import type { LanguageName } from "@uiw/codemirror-extensions-langs";
 import type { TreeDataNode, TreeProps } from "antd";
-
-import { CopyOutlined, FileOutlined, FolderOutlined } from "@ant-design/icons";
+import type { SupportedLanguage } from "#src/components/code-mirror";
+import { FileOutlined, FolderOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { loadLanguage } from "@uiw/codemirror-extensions-langs";
-import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
-import CodeMirror from "@uiw/react-codemirror";
-
 import {
-	Button,
 	Layout,
 	Modal,
 	Space,
@@ -18,9 +11,10 @@ import {
 	theme,
 	Tree,
 } from "antd";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchPreviewCodes } from "#src/api/develop/gen";
-import { usePreferences } from "#src/hooks/use-preferences";
+import CodeMirrorField from "#src/components/code-mirror";
 
 interface ElementProps {
 	id?: string
@@ -32,7 +26,7 @@ interface TreeType {
 	[key: string]: string | TreeType
 }
 
-const langMap: Record<string, LanguageName> = {
+const langMap: Record<string, SupportedLanguage> = {
 	ts: "ts",
 	tsx: "tsx",
 	vue: "vue",
@@ -40,26 +34,24 @@ const langMap: Record<string, LanguageName> = {
 	html: "html",
 	css: "css",
 	less: "less",
-	scss: "sass",
+	scss: "scss",
 	java: "java",
 	sql: "sql",
 	xml: "xml",
 };
 
-function langExtByFilename(filename?: string): Extension | null {
+function langExtByFilename(filename?: string) {
 	if (!filename)
-		return null;
+		return;
 	const lower = filename.toLowerCase();
 	const parts = lower.split(".");
 	if (parts.length >= 2 && parts[parts.length - 1] === "vm") {
 		const realExt = parts[parts.length - 2];
-		const lang = langMap[realExt];
-		return loadLanguage(lang);
+		return langMap[realExt];
 	}
 
 	const ext = parts.pop()!;
-	const lang = langMap[ext];
-	return loadLanguage(lang);
+	return langMap[ext];
 }
 
 function convertTreeFile(path: string, value: string, container: TreeType = {}) {
@@ -115,14 +107,13 @@ function toTreeData(obj: TreeType, defaultKey?: string): [(TreeDataNode & { cont
 
 export default function CodePreview({ id, open, onCloseChange }: ElementProps) {
 	const { token } = theme.useToken();
-	const [extensions, setExtensions] = useState<Extension[]>([loadLanguage("java") as Extension]);
-	const { isDark } = usePreferences();
+	const [language, setLanguage] = useState<SupportedLanguage>("java");
 
 	const [value, setValue] = useState<string>();
-	const handleCopy = useCallback(async () => {
-		await navigator.clipboard?.writeText(value ?? "");
+	const handleCopy = async (code: string) => {
+		await navigator.clipboard?.writeText(code ?? "");
 		window.$message?.success("已复制");
-	}, [value]);
+	};
 
 	const { data, isFetching } = useQuery({
 		queryKey: [id],
@@ -160,7 +151,7 @@ export default function CodePreview({ id, open, onCloseChange }: ElementProps) {
 		// 叶子节点
 		if (node.isLeaf) {
 			const lang = langExtByFilename(node.key as string | undefined);
-			setExtensions(lang ? [lang] : []);
+			setLanguage(lang!);
 		}
 		setValue(node.content);
 	};
@@ -195,22 +186,14 @@ export default function CodePreview({ id, open, onCloseChange }: ElementProps) {
 						</Layout.Sider>
 						<Layout>
 							<Layout.Content>
-								<CodeMirror
+								<CodeMirrorField
 									value={value}
 									height="75vh"
-									readOnly
-									theme={isDark ? githubDark : githubLight}
-									extensions={extensions}
-								>
-									{
-										!!value
-										&& (
-											<div style={{ position: "absolute", right: 45, top: 60, zIndex: 10 }}>
-												<Button size="small" icon={<CopyOutlined />} onClick={handleCopy} />
-											</div>
-										)
-									}
-								</CodeMirror>
+									language={language ?? "tex"}
+									readonly
+									onCopy={handleCopy}
+									style={{ border: 0 }}
+								/>
 							</Layout.Content>
 						</Layout>
 					</Layout>

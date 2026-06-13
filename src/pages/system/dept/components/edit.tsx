@@ -10,7 +10,7 @@ import { Form } from "antd";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import * as api from "#src/api/system/dept";
-import ModalSearch from "#src/components/modal-search";
+import { ProModalSearchField } from "#src/components/modal-search";
 import { handleTree } from "#src/utils/tree";
 
 interface EditProps {
@@ -193,14 +193,17 @@ export default function Edit({
 				readonly={isDisabled(["insert", "edit"])}
 			/>
 
-			<Form.Item label="负责人" name="leader" required={true}>
-				<ModalSearch
-					searchId="2062586130975002626"
-					title="请选择负责人"
-					placeholder="请输入负责人"
-					readonly={isDisabled(["insert", "edit"])}
-				/>
-			</Form.Item>
+			<ProModalSearchField
+				label="负责人"
+				name="leader"
+				required={true}
+				searchId="2062586130975002626"
+				placeholder="请输入负责人"
+				fieldProps={{
+					title: "请选择负责人",
+				}}
+				allowClear={false}
+			/>
 
 			<ProFormText
 				name="phone"
