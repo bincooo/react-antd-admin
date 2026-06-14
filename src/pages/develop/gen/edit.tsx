@@ -87,6 +87,32 @@ const htmlTypeOptions = [
 	{ value: "editor", label: "富文本" },
 ];
 
+function DictTypeCell({ index, dictList }: { index: number, dictList: any[] }) {
+	const form = Form.useFormInstance();
+	const htmlType = Form.useWatch(["columns", index, "htmlType"], form);
+	return (
+		<Form.Item
+			name={["columns", index, htmlType === "modalSearch" ? "searchId" : "dictType"]}
+			style={{ margin: 0 }}
+		>
+			{htmlType === "modalSearch"
+				? <Input style={{ width: 160 }} allowClear />
+				: (
+					<Select
+						style={{ width: 160 }}
+						showSearch
+						allowClear
+						options={dictList.map((x: any) => ({
+							label: x.dictName,
+							value: x.dictType,
+							desc: x.dictType,
+						}))}
+					/>
+				)}
+		</Form.Item>
+	);
+}
+
 function buildMenuTreeData(list: Menu[]): TreeNode[] {
 	list = (list || []).filter(x => x.menuType === "M");
 	const map = new Map<number, TreeNode>();
@@ -251,11 +277,11 @@ function FieldInfo({ dictList, dataSource }: any) {
 					minWidth: 230,
 					search: false,
 					render: (_: any, record: any) => {
-						const i = idIndexMap.get(record.columnId);
-						if (i === undefined)
+						const idx = idIndexMap.get(record.columnId);
+						if (idx === undefined)
 							return null;
 						return (
-							<Form.Item name={["columns", i, "columnComment"]} style={{ margin: 0 }}>
+							<Form.Item name={["columns", idx, "columnComment"]} style={{ margin: 0 }}>
 								<Input />
 							</Form.Item>
 						);
@@ -267,11 +293,11 @@ function FieldInfo({ dictList, dataSource }: any) {
 					minWidth: 230,
 					search: false,
 					render: (_: any, record: any) => {
-						const i = idIndexMap.get(record.columnId);
-						if (i === undefined)
+						const idx = idIndexMap.get(record.columnId);
+						if (idx === undefined)
 							return null;
 						return (
-							<Form.Item name={["columns", i, "javaField"]} style={{ margin: 0 }}>
+							<Form.Item name={["columns", idx, "javaField"]} style={{ margin: 0 }}>
 								<Input />
 							</Form.Item>
 						);
@@ -289,11 +315,11 @@ function FieldInfo({ dictList, dataSource }: any) {
 					width: 120,
 					search: false,
 					render: (_: any, record: any) => {
-						const i = idIndexMap.get(record.columnId);
-						if (i === undefined)
+						const idx = idIndexMap.get(record.columnId);
+						if (idx === undefined)
 							return null;
 						return (
-							<Form.Item name={["columns", i, "javaType"]} style={{ margin: 0 }}>
+							<Form.Item name={["columns", idx, "javaType"]} style={{ margin: 0 }}>
 								<Select
 									style={{ width: 120 }}
 									options={javaTypeOptions}
@@ -310,12 +336,12 @@ function FieldInfo({ dictList, dataSource }: any) {
 					align: "center",
 					search: false,
 					render: (_: any, record: any) => {
-						const i = idIndexMap.get(record.columnId);
-						if (i === undefined)
+						const idx = idIndexMap.get(record.columnId);
+						if (idx === undefined)
 							return null;
 						return (
 							<div style={{ display: "flex", justifyContent: "center" }}>
-								<Form.Item {...checkboxItemProps(["columns", i, "isInsert"])} noStyle>
+								<Form.Item {...checkboxItemProps(["columns", idx, "isInsert"])} noStyle>
 									<Checkbox />
 								</Form.Item>
 							</div>
@@ -329,12 +355,12 @@ function FieldInfo({ dictList, dataSource }: any) {
 					align: "center",
 					search: false,
 					render: (_: any, record: any) => {
-						const i = idIndexMap.get(record.columnId);
-						if (i === undefined)
+						const idx = idIndexMap.get(record.columnId);
+						if (idx === undefined)
 							return null;
 						return (
 							<div style={{ display: "flex", justifyContent: "center" }}>
-								<Form.Item {...checkboxItemProps(["columns", i, "isEdit"])} noStyle>
+								<Form.Item {...checkboxItemProps(["columns", idx, "isEdit"])} noStyle>
 									<Checkbox />
 								</Form.Item>
 							</div>
@@ -347,12 +373,12 @@ function FieldInfo({ dictList, dataSource }: any) {
 					width: 60,
 					search: false,
 					render: (_: any, record: any) => {
-						const i = idIndexMap.get(record.columnId);
-						if (i === undefined)
+						const idx = idIndexMap.get(record.columnId);
+						if (idx === undefined)
 							return null;
 						return (
 							<div style={{ display: "flex", justifyContent: "center" }}>
-								<Form.Item {...checkboxItemProps(["columns", i, "isList"])} noStyle>
+								<Form.Item {...checkboxItemProps(["columns", idx, "isList"])} noStyle>
 									<Checkbox />
 								</Form.Item>
 							</div>
@@ -365,12 +391,12 @@ function FieldInfo({ dictList, dataSource }: any) {
 					width: 60,
 					search: false,
 					render: (_: any, record: any) => {
-						const i = idIndexMap.get(record.columnId);
-						if (i === undefined)
+						const idx = idIndexMap.get(record.columnId);
+						if (idx === undefined)
 							return null;
 						return (
 							<div style={{ display: "flex", justifyContent: "center" }}>
-								<Form.Item {...checkboxItemProps(["columns", i, "isQuery"])} noStyle>
+								<Form.Item {...checkboxItemProps(["columns", idx, "isQuery"])} noStyle>
 									<Checkbox />
 								</Form.Item>
 							</div>
@@ -383,11 +409,11 @@ function FieldInfo({ dictList, dataSource }: any) {
 					width: 100,
 					search: false,
 					render: (_: any, record: any) => {
-						const i = idIndexMap.get(record.columnId);
-						if (i === undefined)
+						const idx = idIndexMap.get(record.columnId);
+						if (idx === undefined)
 							return null;
 						return (
-							<Form.Item name={["columns", i, "queryType"]} style={{ margin: 0 }}>
+							<Form.Item name={["columns", idx, "queryType"]} style={{ margin: 0 }}>
 								<Select
 									style={{ width: 100 }}
 									options={queryTypeOptions}
@@ -403,12 +429,12 @@ function FieldInfo({ dictList, dataSource }: any) {
 					width: 60,
 					search: false,
 					render: (_: any, record: any) => {
-						const i = idIndexMap.get(record.columnId);
-						if (i === undefined)
+						const idx = idIndexMap.get(record.columnId);
+						if (idx === undefined)
 							return null;
 						return (
 							<div style={{ display: "flex", justifyContent: "center" }}>
-								<Form.Item {...checkboxItemProps(["columns", i, "required"])} noStyle>
+								<Form.Item {...checkboxItemProps(["columns", idx, "required"])} noStyle>
 									<Checkbox />
 								</Form.Item>
 							</div>
@@ -421,11 +447,11 @@ function FieldInfo({ dictList, dataSource }: any) {
 					width: 120,
 					search: false,
 					render: (_: any, record: any) => {
-						const i = idIndexMap.get(record.columnId);
-						if (i === undefined)
+						const idx = idIndexMap.get(record.columnId);
+						if (idx === undefined)
 							return null;
 						return (
-							<Form.Item name={["columns", i, "htmlType"]} style={{ margin: 0 }}>
+							<Form.Item name={["columns", idx, "htmlType"]} style={{ margin: 0 }}>
 								<Select
 									style={{ width: 120 }}
 									options={htmlTypeOptions}
@@ -441,28 +467,10 @@ function FieldInfo({ dictList, dataSource }: any) {
 					width: 160,
 					search: false,
 					render: (_: any, record: any) => {
-						const i = idIndexMap.get(record.columnId);
-						if (i === undefined)
+						const idx = idIndexMap.get(record.columnId);
+						if (idx === undefined)
 							return null;
-						return (
-							<Form.Item name={["columns", i, "dictType"]} style={{ margin: 0 }}>
-								<Select
-									style={{ width: 160 }}
-									showSearch
-									allowClear
-									options={dictList.map((x: any) => ({ label: x.dictName, value: x.dictType, desc: x.dictType }))}
-									optionRender={(option) => {
-										const data: any = option.data;
-										return (
-											<div>
-												<div style={{ height: 20 }}>{data.label}</div>
-												<div style={{ fontSize: 12, color: "grey" }}>{data.desc}</div>
-											</div>
-										);
-									}}
-								/>
-							</Form.Item>
-						);
+						return <DictTypeCell index={idx} dictList={dictList} />;
 					},
 				},
 			]}

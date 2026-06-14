@@ -1,5 +1,7 @@
+import type { ProColumns } from "@ant-design/pro-components";
 import { SearchOutlined } from "@ant-design/icons";
 import {
+
 	ProTable,
 } from "@ant-design/pro-components";
 
@@ -15,6 +17,7 @@ export interface ModalSearchProp<T> extends Record<string, any> {
 	defaultValue?: number | string
 	searchId?: string
 	value?: T
+	columns?: ProColumns<any>[]
 
 	// request?: ProTableProps<T, any>["request"]
 	onChange?: (value?: any) => void
@@ -56,7 +59,7 @@ function ProModalSearchField<T,>({ width, readonly, placeholder, searchId, name,
 	);
 }
 
-function ModalSearchField<T,>({ title, width = "95%", style = { maxWidth: "900px" }, value: _value, defaultValue, searchId, readonly = false, onChange, ...rest }: ModalSearchProp<T>) {
+function ModalSearchField<T,>({ title, width = "95%", style = { maxWidth: "900px" }, value: _value, defaultValue, searchId, readonly = false, columns, onChange, ...rest }: ModalSearchProp<T>) {
 	if (!style.maxWidth) {
 		style.maxWidth = "900px";
 	}
@@ -76,6 +79,32 @@ function ModalSearchField<T,>({ title, width = "95%", style = { maxWidth: "900px
 
 	if (readonly) {
 		return <span>{value.name || "-"}</span>;
+	}
+
+	if (!columns || columns.length === 0) {
+		columns = [
+			{
+				title: "编码",
+				dataIndex: "code",
+				proFieldProps: {
+					placeholder: "请输入编码",
+				},
+				width: 180,
+			},
+			{
+				title: "名称",
+				dataIndex: "name",
+				proFieldProps: {
+					placeholder: "请输入名称",
+				},
+				width: 210,
+			},
+			{
+				title: "描述",
+				dataIndex: "remark",
+				search: false,
+			},
+		];
 	}
 
 	return (
@@ -119,29 +148,7 @@ function ModalSearchField<T,>({ title, width = "95%", style = { maxWidth: "900px
 					{...rest}
 					rowKey="id"
 					size="small"
-					columns={[
-						{
-							title: "编码",
-							dataIndex: "code",
-							proFieldProps: {
-								placeholder: "请输入编码",
-							},
-							width: 180,
-						},
-						{
-							title: "名称",
-							dataIndex: "name",
-							proFieldProps: {
-								placeholder: "请输入名称",
-							},
-							width: 210,
-						},
-						{
-							title: "描述",
-							dataIndex: "description",
-							search: false,
-						},
-					]}
+					columns={columns}
 					request={async (params) => {
 						if (!searchId) {
 							return { data: [] };

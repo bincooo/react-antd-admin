@@ -70,14 +70,12 @@ export function getColumnList(
 			},
 		},
 		{
-			title: "模型描述",
-			dataIndex: "description",
+			title: "描述",
+			dataIndex: "remark",
 			search: false,
 			proFieldProps: {
-				searchId: "$column.searchId",
-				placeholder: "请输入模型描述",
+				placeholder: "请输入描述",
 			},
-			valueType: "modalSearch" as any,
 		},
 	], options);
 }

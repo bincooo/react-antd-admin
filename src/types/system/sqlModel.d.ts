@@ -22,9 +22,9 @@ declare namespace System {
 		sqlText?: string
 
 		/**
-		 * 模型描述
+		 * 描述
 		 */
-		description?: string
+		remark?: string
 
 		/**
 		 * 创建时间

@@ -80,12 +80,18 @@ const CodeMirrorField: React.FC<CodeMirrorFieldProps> = ({
 		const ext = languageExtensions[language];
 		const CodeTheme = EditorView.theme({
 			"&.cm-focused": { outline: "none" },
+			"&": {
+				borderRadius: `${token.borderRadius}px`,
+			},
+			".cm-scroller": {
+				borderRadius: `${token.borderRadius}px 0 0 ${token.borderRadius}px`,
+			},
 			".cm-placeholder": {
 				color: token.colorTextPlaceholder,
 			},
 		});
 		setExtensions(ext ? [ext, CodeTheme] : [CodeTheme]);
-	}, [language]);
+	}, [token]);
 	const [isHovered, setIsHovered] = useState(false);
 	const [isFocused, setIsFocused] = useState(false);
 	const { isDark } = usePreferences();
@@ -105,6 +111,7 @@ const CodeMirrorField: React.FC<CodeMirrorFieldProps> = ({
 				border: `1px solid ${(isFocused || isHovered) ? token.colorPrimary : token.colorBorder}`,
 				boxShadow: isFocused ? `0 0 0 2px ${token.colorPrimaryBg}` : "none",
 				transition: "all 0.2s",
+				borderRadius: token.borderRadius,
 				...style,
 			}}
 		>
@@ -124,6 +131,7 @@ const CodeMirrorField: React.FC<CodeMirrorFieldProps> = ({
 				readOnly={readonly || disabled}
 				theme={isDark ? githubDark : githubLight}
 				style={{
+					borderRadius: `${token.borderRadius}px`,
 					cursor: disabled ? "not-allowed" : (readonly ? "default" : "text"),
 				}}
 

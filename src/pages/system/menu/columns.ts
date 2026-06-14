@@ -3,27 +3,28 @@ import type { TFunction } from "i18next";
 /**
  * 由后台配置生成，不可手工修改
  */
-import type { JSX } from "react";
 
-interface DictData {
-	label: string | JSX.Element
-	value: string | number
-	desc?: string
-}
+type Merger<T extends { dataIndex: string }> = (option: T) => T;
 
-type Merger<T> = (option: T) => T;
-
-function merge<T>(columns: (T & { dataIndex: string })[], options?: { [column: string]: Merger<T & { dataIndex: string }> }): T[] {
-	for (const i in columns) {
-		const instance = options?.[columns[i].dataIndex];
-		if (instance) {
-			columns[i] = instance({ ...columns[i] });
+function merge<T extends { dataIndex: string }>(
+	columns: (T & { dataIndex: string })[],
+	options?: { [column: string]: Merger<T> },
+): T[] {
+	for (const idx in columns) {
+		const exec = options?.[columns[idx].dataIndex];
+		if (exec) {
+			columns[idx] = exec({ ...columns[idx] });
 		}
 	}
 	return columns;
 }
 
-export function getColumnList(t: TFunction<"translation", undefined>, options?: { [column: string]: Merger<ProColumns<System.Menu> & { dataIndex: string }> }, dictMap?: { [column: string]: DictData[] }): ProColumns<System.Menu>[] {
+export function getColumnList(
+	t: TFunction<"translation", undefined>,
+	options?: {
+		[column: string]: Merger<ProColumns<System.Menu> & { dataIndex: string }>
+	},
+): ProColumns<System.Dept>[] {
 	return merge([
 		{
 			title: "菜单名称",

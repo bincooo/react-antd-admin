@@ -3,25 +3,16 @@ import type { TFunction } from "i18next";
 /**
  * 由后台配置生成，不可手工修改
  */
-import type { JSX } from "react";
-import { executeSql } from "#src/api/common";
+type Merger<T extends { dataIndex: string }> = (option: T) => T;
 
-interface DictData {
-	label: string | JSX.Element
-	value: string | number
-	desc?: string
-}
-
-type Merger<T> = (option: T) => T;
-
-function merge<T>(
+function merge<T extends { dataIndex: string }>(
 	columns: (T & { dataIndex: string })[],
-	options?: { [column: string]: Merger<T & { dataIndex: string }> },
+	options?: { [column: string]: Merger<T> },
 ): T[] {
-	for (const i in columns) {
-		const instance = options?.[columns[i].dataIndex];
-		if (instance) {
-			columns[i] = instance({ ...columns[i] });
+	for (const idx in columns) {
+		const exec = options?.[columns[idx].dataIndex];
+		if (exec) {
+			columns[idx] = exec({ ...columns[idx] });
 		}
 	}
 	return columns;
@@ -64,10 +55,7 @@ export function getColumnList(
 				// search: false,
 				proFieldProps: {
 					searchId: "2062586130975002626",
-				},
-				fieldProps: {
 					placeholder: "请输入负责人",
-					defaultValue: 0,
 				},
 			},
 			{

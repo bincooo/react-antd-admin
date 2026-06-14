@@ -5,10 +5,10 @@ import {
 	ProFormTextArea,
 } from "@ant-design/pro-components";
 import { useMutation, useQueries } from "@tanstack/react-query";
-import { Form } from "antd";
+import { Form, Upload } from "antd";
 
 import { observer, useLocalObservable } from "mobx-react-lite";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import * as api from "#src/api/system/sqlModel";
@@ -130,35 +130,38 @@ export default observer(({ id, open = true, onClose, ...props }: EditProps) => {
 				placeholder="请输入模型名称"
 				readonly={context.isDisabled(["insert", "edit"])}
 				allowClear={false}
-				rules={[{ required: true }]}
+				rules={[
+					{ required: true },
+				]}
 			/>
-
 			<ProFormSelect
 				name="javaType"
 				label="主键类型"
 				placeholder="请选择主键类型"
 				readonly={context.isDisabled(["insert", "edit"])}
 				allowClear={false}
-				rules={[{ required: true }]}
+				rules={[
+					{ required: true },
+				]}
 				options={[
 					{ value: "0", label: "数值" },
 					{ value: "1", label: "字符" },
 				]}
 			/>
-
 			<ProCodeMirrorField
 				name="sqlText"
 				label="sql语句"
 				placeholder="请输入sql语句"
 				readonly={context.isDisabled(["insert", "edit"])}
-				language="sql"
-				rules={[{ required: true }]}
+				language="javascript"
+				rules={[
+					{ required: true },
+				]}
 			/>
-
 			<ProFormTextArea
-				name="description"
-				label="模型描述"
-				placeholder="请输入模型描述"
+				name="remark"
+				label="描述"
+				placeholder="请输入描述"
 				readonly={context.isDisabled(["insert", "edit"])}
 				allowClear={false}
 			/>
