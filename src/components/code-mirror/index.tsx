@@ -17,19 +17,19 @@ import React, { useEffect, useState } from "react";
 import { usePreferences } from "#src/hooks/use-preferences";
 
 export type SupportedLanguage = "js"
-  | "javascript"
-  | "ts"
-  | "tsx"
-  | "vue"
-  | "json"
-  | "html"
-  | "css"
-  | "less"
-  | "scss"
-  | "java"
-  | "sql"
-  | "xml"
-  | "tex";
+	| "javascript"
+	| "ts"
+	| "tsx"
+	| "vue"
+	| "json"
+	| "html"
+	| "css"
+	| "less"
+	| "scss"
+	| "java"
+	| "sql"
+	| "xml"
+	| "tex";
 
 const languageExtensions: Record<SupportedLanguage, any> = {
 	js: javascript({ jsx: false }),

@@ -1,5 +1,3 @@
-import { BasicButton } from "#src/components/basic-button";
-
 import { LeftOutlined } from "@ant-design/icons";
 import { useCountDown } from "ahooks";
 import {
@@ -92,7 +90,7 @@ export function ForgotPassword() {
 				</Form.Item>
 
 				<div className="text-sm text-center">
-					<BasicButton
+					<Button
 						type="link"
 						icon={<LeftOutlined />}
 						className="px-1"
@@ -101,7 +99,7 @@ export function ForgotPassword() {
 						}}
 					>
 						{t("common.back")}
-					</BasicButton>
+					</Button>
 				</div>
 			</Form>
 		</>

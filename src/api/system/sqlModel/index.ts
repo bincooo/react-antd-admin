@@ -6,7 +6,7 @@ import { request } from "#src/utils/request";
  * @returns {*}
  */
 export function page(query: any) {
-	return request.get<ApiListResponse<System.SqlModel>>("system/sqlModel/page", { searchParams: query }).json();
+    return request.get<ApiListResponse<System.SqlModel>>('system/sqlModel/page', { searchParams: query }).json();
 }
 
 /**
@@ -14,7 +14,7 @@ export function page(query: any) {
  * @param id
  */
 export function getById(id: string | number) {
-	return request.get<ApiResponse<System.SqlModel>>(`system/sqlModel/${id}`).json();
+    return request.get<ApiResponse<System.SqlModel>>(`system/sqlModel/${id}`).json();
 };
 
 /**
@@ -22,7 +22,7 @@ export function getById(id: string | number) {
  * @param data
  */
 export function create(data: System.SqlModel) {
-	return request.post<ApiResponse<void>>("system/sqlModel", { json: data }).json();
+    return request.post<ApiResponse<void>>('system/sqlModel', { json: data }).json();
 }
 
 /**
@@ -30,7 +30,7 @@ export function create(data: System.SqlModel) {
  * @param data
  */
 export function update(data: System.SqlModel) {
-	return request.put<ApiResponse<void>>("system/sqlModel", { json: data }).json();
+    return request.put<ApiResponse<void>>('system/sqlModel', { json: data }).json();
 }
 
 /**
@@ -38,9 +38,9 @@ export function update(data: System.SqlModel) {
  * @param ids
  */
 export function deleteByIds(ids: Array<number | string>) {
-	return request.delete<ApiResponse<void>>(`system/sqlModel/${ids.join(",")}`).json();
+    return request.delete<ApiResponse<void>>(`system/sqlModel/${ids.join(',')}`).json();
 }
 
 export function dictTypes(types: string[]) {
-	return request.get<ApiResponse<Record<string, { dictLabel: string, dictValue: string }[]>>>(`system/dict/data/types/${types.join(",")}`).json();
+    return request.get<ApiResponse<Record<string, { dictLabel: string, dictValue: string }[]>>>(`system/dict/data/types/${types.join(',')}`).json();
 }

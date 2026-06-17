@@ -1,3 +1,8 @@
+/**
+ * 代码生成器 - 列表页
+ * 展示生成表列表，支持表格操作（新增、编辑、删除、同步、生成）
+ */
+
 import type { ActionType, ProColumns } from "@ant-design/pro-components";
 import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
@@ -17,10 +22,21 @@ import CodePreview from "./components/preview";
 import ToolBarRender from "./components/tool-bar-render";
 import { useGenMutations } from "./hooks/use-mutations";
 
+/**
+ * 代码生成器列表页
+ */
 export default function GenTable() {
 	const { t } = useTranslation();
-	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const navigate = useNavigate();
+	const actionRef = useRef<ActionType>(null);
+
+	// 状态管理
+	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+	const [isOpen, setIsOpen] = useState(false);
+	const [isPreview, setIsPreview] = useState(false);
+	const [previewId, setPreviewId] = useState<string>();
+
+	// 数据源名称列表
 	const { data: dataNames } = useQuery({
 		queryKey: ["dataName"],
 		queryFn: async () => {
@@ -30,15 +46,14 @@ export default function GenTable() {
 		initialData: [],
 	});
 
-	const actionRef = useRef<ActionType>(null);
-	const [isOpen, setIsOpen] = useState(false);
-	const [isPreview, setIsPreview] = useState(false);
-	const [previewId, setPreviewId] = useState<string>();
-
+	/**
+	 * 刷新表格数据
+	 */
 	const refreshTable = () => {
 		actionRef.current?.reload();
 	};
 
+	// 增删改查操作
 	const {
 		deleteDbTableMutation,
 		handleDeleteRow,
@@ -46,6 +61,7 @@ export default function GenTable() {
 		handleGenarateRow,
 	} = useGenMutations(refreshTable, setSelectedRowKeys);
 
+	// 表格列定义
 	const columns: ProColumns<Develop.Table>[] = [
 		...getColumns(t, [
 			(dataIndex) => {
@@ -76,29 +92,24 @@ export default function GenTable() {
 				rowSelection={{
 					selectedRowKeys,
 					preserveSelectedRowKeys: true,
-					onChange: (keys) => {
-						setSelectedRowKeys(keys);
-					},
+					onChange: keys => setSelectedRowKeys(keys),
 				}}
 				request={async (params) => {
-					const responseData = await fetchList({ ...params, pageNum: params.current });
+					const res = await fetchList({ ...params, pageNum: params.current });
 					return {
-						...responseData,
-						data: responseData.data.list,
-						total: responseData.data.total,
+						...res,
+						data: res.data.list,
+						total: res.data.total,
 					};
 				}}
 				toolBarRender={() => ToolBarRender({
-					selectedRowKeys,
 					deleteLoading: deleteDbTableMutation.isPending,
-					onDelete: () => {
-						handleDeleteRow([...selectedRowKeys.map(String)]);
-					},
-					onAdd: () => {
-						setIsOpen(true);
-					},
+					onDelete: () => handleDeleteRow([...selectedRowKeys.map(String)]),
+					onAdd: () => setIsOpen(true),
 				})}
 			/>
+
+			{/* 导入表弹窗 */}
 			<DbTableModal
 				open={isOpen}
 				dataNames={dataNames}
@@ -106,7 +117,15 @@ export default function GenTable() {
 				refreshTable={refreshTable}
 			/>
 
-			{previewId && <CodePreview key={previewId} id={previewId} open={isPreview} onCloseChange={() => { setIsPreview(false); }} />}
+			{/* 代码预览弹窗 */}
+			{previewId && (
+				<CodePreview
+					key={previewId}
+					id={previewId}
+					open={isPreview}
+					onCloseChange={() => setIsPreview(false)}
+				/>
+			)}
 		</BasicContent>
 	);
 };

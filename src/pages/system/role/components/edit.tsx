@@ -17,8 +17,7 @@ import * as api from "#src/api/system/role";
 import MenuTree from "./menu-tree";
 
 interface EditProps {
-	title?: string
-	roleId?: string | number
+	pkId?: string | number
 	dictMap?: {
 		[k: string]: {
 			label: string
@@ -30,37 +29,37 @@ interface EditProps {
 	onClose?: (refresh?: boolean) => void
 }
 
-export default function Edit({ roleId, open = true, onClose, ...props }: EditProps) {
+export default function Edit({ pkId, open = true, onClose, ...props }: EditProps) {
 	const { t } = useTranslation();
 	const [form] = Form.useForm<System.Role>();
 	const treeRef = useRef<MenuTreeRef>(null);
 
 	const isDisabled = (command: string[]) => {
-		if (command.includes("insert") && !roleId) {
+		if (command.includes("insert") && !pkId) {
 			return false;
 		}
-		if (command.includes("edit") && roleId) {
+		if (command.includes("edit") && pkId) {
 			return false;
 		}
 		return true;
 	};
 
-	const [roleData, menuList] = useQueries({
+	const [role, menus] = useQueries({
 		queries: [
 			{
-				queryKey: ["role", roleId],
+				queryKey: ["role", pkId],
 				queryFn: async () => {
-					if (!roleId) {
+					if (!pkId) {
 						return null;
 					}
-					const { data } = await api.getById(roleId);
+					const { data } = await api.getById(pkId);
 					return data;
 				},
 			},
 			{
 				queryKey: ["menu"],
 				queryFn: async () => {
-					return (await getRoleMenuTree(roleId ?? "-1"))?.data;
+					return (await getRoleMenuTree(pkId ?? "-1"))?.data;
 				},
 			},
 		],
@@ -89,7 +88,7 @@ export default function Edit({ roleId, open = true, onClose, ...props }: EditPro
 	const onFinish = async (values: System.Role) => {
 		const menuIds = treeRef.current?.getSelectedMenuKeys();
 		/* 有 id 则为修改，否则为新增 */
-		if (roleId) {
+		if (pkId) {
 			await updateMutation.mutateAsync({ ...form.getFieldsValue(true), menuIds, menuCheckStrictly: false });
 			window.$message?.success(t("common.updateSuccess"));
 		}
@@ -105,18 +104,19 @@ export default function Edit({ roleId, open = true, onClose, ...props }: EditPro
 
 	useEffect(() => {
 		if (open) {
-			if (roleData.data) {
-				form.setFieldsValue(roleData.data);
+			if (role.data) {
+				form.setFieldsValue(role.data);
 				return;
 			}
 			form.resetFields();
 		}
-	}, [open, roleData.data]);
+	}, [open, role.data]);
 
 	return (
 		<DrawerForm<System.Role>
 			{...props}
 			open={open}
+			title={pkId ? "编辑角色" : "创建角色"}
 			onOpenChange={(visible) => {
 				if (visible === false) {
 					onClose?.();
@@ -149,6 +149,7 @@ export default function Edit({ roleId, open = true, onClose, ...props }: EditPro
 				rules={[
 					{ required: true },
 				]}
+				width="md"
 			/>
 			<ProFormText
 				name="roleKey"
@@ -159,6 +160,7 @@ export default function Edit({ roleId, open = true, onClose, ...props }: EditPro
 				rules={[
 					{ required: true },
 				]}
+				width="md"
 			/>
 			<ProFormDigit
 				name="roleSort"
@@ -169,6 +171,7 @@ export default function Edit({ roleId, open = true, onClose, ...props }: EditPro
 				rules={[
 					{ required: true },
 				]}
+				width="md"
 			/>
 			<ProFormSelect
 				allowClear
@@ -184,6 +187,7 @@ export default function Edit({ roleId, open = true, onClose, ...props }: EditPro
 					{ value: "5", label: "仅本人数据权限" },
 					{ value: "6", label: "部门及以下或本人数据权限" },
 				]}
+				width="md"
 			/>
 			<ProFormRadio.Group
 				name="status"
@@ -208,7 +212,7 @@ export default function Edit({ roleId, open = true, onClose, ...props }: EditPro
 				allowClear={false}
 			/>
 			<Divider titlePlacement="start" plain>权限设置</Divider>
-			<MenuTree ref={treeRef} menuData={menuList.data} />
+			<MenuTree ref={treeRef} menuData={menus.data} />
 		</DrawerForm>
 	);
 };

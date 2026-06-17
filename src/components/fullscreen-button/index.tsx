@@ -1,6 +1,5 @@
-import type { ButtonProps } from "antd";
 import type { RefObject } from "react";
-import { BasicButton } from "#src/components/basic-button";
+import { Button, type ButtonProps } from "antd";
 import { FullscreenExitOutlined, FullscreenOutlined } from "@ant-design/icons";
 
 import { useFullscreen } from "ahooks";
@@ -29,7 +28,7 @@ export const FullscreenButton: React.FC<FullscreenButtonProps> = ({
 	const [isFullscreen, { toggleFullscreen }] = useFullscreen(target);
 
 	return (
-		<BasicButton
+		<Button
 			type="text"
 			{...restProps}
 			icon={!isFullscreen ? (fullscreenIcon ?? <FullscreenOutlined />) : (fullscreenExitIcon ?? <FullscreenExitOutlined />)}

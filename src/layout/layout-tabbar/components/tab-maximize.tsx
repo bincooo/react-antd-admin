@@ -1,4 +1,4 @@
-import { BasicButton } from "#src/components/basic-button";
+import { Button } from "antd";
 import { useTabsStore } from "#src/store/tabs";
 import { cn } from "#src/utils/cn";
 
@@ -27,7 +27,7 @@ export function TabMaximize({ className }: TabMaximizeProps) {
 	};
 
 	return (
-		<BasicButton
+		<Button
 			className={cn(className)}
 			type="text"
 			size="middle"

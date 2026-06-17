@@ -1,14 +1,27 @@
 import type { ProColumns, ProCoreActionType } from "@ant-design/pro-components";
-import { Button } from "antd";
+import PermissionButton from "#src/components/permission-button";
 
 import { useAuthStore } from "#src/store/auth";
-import PermButton from "./perm-button";
+import { useAccess } from "#src/hooks/use-access";
 
+/**
+ * 代码生成器列表 - 操作列配置
+ * 定义表格操作列的按钮及其交互逻辑
+ */
+
+/**
+ * 操作列回调函数接口
+ */
 interface ActionColumnsProps {
+	/** 预览代码 */
 	onPreview: (tableId: string) => void
+	/** 删除表格 */
 	onDelete: (ids: string[], action?: ProCoreActionType<object>) => void
+	/** 同步数据库表结构 */
 	onSync: (id: string, action?: ProCoreActionType<object>) => void
+	/** 生成代码（下载或写入项目） */
 	onGenerate: (type: string, tableName: string, id: string) => void
+	/** 编辑表格配置 */
 	onEdit: (tableId: string) => void
 }
 
@@ -28,47 +41,63 @@ export function getActionColumns({
 			fixed: "right",
 			render: (text, record, _, action) => {
 				return [
-					<PermButton
+					// 编辑
+					<PermissionButton
 						key="edit"
+						type="link"
+						size="small"
 						perm="develop:gen:update"
 						onClick={() => onEdit(record.tableId)}
 					>
 						编辑
-					</PermButton>,
-					<Button
+					</PermissionButton>,
+					// 预览
+					<PermissionButton
 						key="preview"
 						type="link"
 						size="small"
 						onClick={() => onPreview(record.tableId)}
 					>
 						预览
-					</Button>,
-					<PermButton
+					</PermissionButton>,
+					// 删除
+					<PermissionButton
 						key="delete"
+						type="link"
+						size="small"
 						perm="develop:gen:delete"
 						onClick={() => onDelete([record.tableId], action)}
 					>
 						删除
-					</PermButton>,
-					<PermButton
+					</PermissionButton>,
+					// 同步表结构
+					<PermissionButton
 						key="sync"
+						type="link"
+						size="small"
 						perm="develop:gen:sync"
 						onClick={() => onSync(record.tableId, action)}
 					>
 						同步
-					</PermButton>,
-					<PermButton
+					</PermissionButton>,
+					// 生成代码
+					<PermissionButton
 						key="generate"
+						type="link"
+						size="small"
 						perm="develop:gen:generate"
 						onClick={() => onGenerate(record.genType, record.tableName, record.tableId)}
 					>
 						生成
-					</PermButton>,
+					</PermissionButton>,
+					// 设计器入口（仅项目目录模式可用）
 					record.genType === "1" && (
-						<PermButton
+						<PermissionButton
 							key="design"
-							perm="develop:gen:design"
+							type="link"
+							size="small"
 							disabled={!record.options?.pages}
+							perm="develop:gen:design"
 							onClick={() => {
 								if (!record.options?.pages) {
 									window.$message?.error("请生成代码后执行");
@@ -79,7 +108,7 @@ export function getActionColumns({
 							}}
 						>
 							设计器
-						</PermButton>
+						</PermissionButton>
 					),
 				].filter(Boolean);
 			},

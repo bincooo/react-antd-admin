@@ -61,7 +61,7 @@ export function getRoleMenuTree(roleId: string | number) {
 
 /* 字典列表 */
 export function fetchDictList() {
-	return request.get<ApiListResponse<Develop.Dict>>("system/dict/type/optionselect").json();
+	return request.get<ApiResponse<Develop.Dict[]>>("system/dict/type/optionselect").json();
 }
 
 /* 保存生成数据 */

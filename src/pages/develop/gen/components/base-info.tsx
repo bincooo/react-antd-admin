@@ -1,9 +1,19 @@
+/**
+ * 代码生成器 - 基础信息表单
+ * 表名称、表描述、实体名、作者、备注
+ */
+
 import { Col, Form, Input, Row } from "antd";
 
 interface BaseInfoProps {
+	/** 容器样式 */
 	style?: React.CSSProperties
 }
 
+/**
+ * 基础信息表单组件
+ * @description 用于代码生成器编辑页的基础信息标签页
+ */
 export default function BaseInfo({ style }: BaseInfoProps) {
 	return (
 		<div style={style}>

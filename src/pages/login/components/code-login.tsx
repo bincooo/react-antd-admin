@@ -1,4 +1,3 @@
-import { BasicButton } from "#src/components/basic-button";
 import { MOBILE_PHONE_RULES } from "#src/constants/rules";
 
 import { LeftOutlined } from "@ant-design/icons";
@@ -97,7 +96,7 @@ export function CodeLogin() {
 				</Form.Item>
 
 				<div className="text-sm text-center">
-					<BasicButton
+					<Button
 						type="link"
 						icon={<LeftOutlined />}
 						className="px-1"
@@ -106,7 +105,7 @@ export function CodeLogin() {
 						}}
 					>
 						{t("common.back")}
-					</BasicButton>
+					</Button>
 				</div>
 			</Form>
 		</>

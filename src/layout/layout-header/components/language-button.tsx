@@ -1,7 +1,6 @@
 import type { LanguageType } from "#src/locales";
-import type { ButtonProps, MenuProps } from "antd";
+import { Button, type ButtonProps, type MenuProps } from "antd";
 
-import { BasicButton } from "#src/components/basic-button";
 import { useLanguage } from "#src/hooks/use-language";
 import { getLanguageItems } from "#src/layout/widgets/preferences/blocks/general/utils";
 
@@ -29,12 +28,12 @@ export function LanguageButton({ ...restProps }: ButtonProps) {
 			arrow={false}
 			placement="bottom"
 		>
-			<BasicButton
+			<Button
 				type="text"
 				{...restProps}
 			>
 				<TranslationOutlined />
-			</BasicButton>
+			</Button>
 		</Dropdown>
 	);
 }

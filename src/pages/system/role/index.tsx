@@ -6,21 +6,19 @@ import type {
 
 import { DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
-import { Button, Tag } from "antd";
+import { Tag } from "antd";
 
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import * as api from "#src/api/system/role";
 import { BasicContent } from "#src/components/basic-content";
 import { BasicTable } from "#src/components/basic-table";
-
-import { useAccess } from "#src/hooks/use-access";
+import PermissionButton from "#src/components/permission-button";
 import { getColumnList } from "./columns";
 import Edit from "./components/edit";
 
 export default function Page() {
 	const { t } = useTranslation();
-	const { hasPerms } = useAccess();
 
 	const deleteMutation = useMutation({
 		mutationFn: async (ids: (string | number)[]) => {
@@ -33,14 +31,13 @@ export default function Page() {
 		},
 	});
 
-	const [isOpen, setIsOpen] = useState(false);
-	const [title, setTitle] = useState("");
-	const [item, setItem] = useState<Partial<System.Role>>({});
+	const [editVisible, setEditVisible] = useState(false);
+	const [editId, setEditId] = useState<string | number>();
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
 	const onCloseChange = () => {
-		setIsOpen(false);
-		setItem({});
+		setEditVisible(false);
+		setEditId(undefined);
 	};
 
 	const actionRef = useRef<ActionType>(null);
@@ -98,33 +95,32 @@ export default function Page() {
 			minWidth: 120,
 			fixed: "right",
 			disable: true,
-			render: (node, record) => {
+			render: (_, record) => {
 				return [
-					<Button
+					<PermissionButton
 						key="update"
 						type="link"
 						size="small"
-						disabled={!hasPerms("system:role:update")}
+						perm="system:role:update"
 						onClick={() => {
-							setItem({ ...record });
-							setIsOpen(true);
-							setTitle("编辑角色");
+							setEditId(record.roleId);
+							setEditVisible(true);
 						}}
 					>
 						编辑
-					</Button>,
-					<Button
+					</PermissionButton>,
+					<PermissionButton
 						key="delete"
 						type="link"
 						size="small"
 						danger={true}
-						disabled={!hasPerms("system:role:delete")}
+						perm="system:role:delete"
 						onClick={() => {
 							handleDeleteRow([record.roleId!]);
 						}}
 					>
 						删除
-					</Button>,
+					</PermissionButton>,
 				];
 			},
 		},
@@ -153,37 +149,35 @@ export default function Page() {
 					};
 				}}
 				toolBarRender={() => [
-					<Button
+					<PermissionButton
 						key="delete"
 						icon={<DeleteOutlined />}
 						danger
-						disabled={!hasPerms("system:role:delete")}
+						perm="system:role:delete"
 						onClick={() => {
 							handleDeleteRow([...selectedRowKeys.map(String)]);
 						}}
 					>
 						删除
-					</Button>,
-					<Button
+					</PermissionButton>,
+					<PermissionButton
 						key="create"
 						icon={<PlusCircleOutlined />}
 						type="primary"
-						disabled={!hasPerms("system:role:create")}
+						perm="system:role:create"
 						onClick={() => {
-							setIsOpen(true);
-							setTitle("创建角色");
+							setEditVisible(true);
 						}}
 					>
 						新增
-					</Button>,
+					</PermissionButton>,
 				]}
 			/>
 
 			<Edit
-				key={item?.roleId}
-				title={title}
-				roleId={item?.roleId}
-				open={isOpen}
+				key={editId}
+				pkId={editId}
+				open={editVisible}
 				onClose={onCloseChange}
 			/>
 		</BasicContent>

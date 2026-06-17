@@ -23,7 +23,7 @@ export function useAccess() {
 	 */
 	const hasPerms = (permission?: string | Array<string>) => {
 		if (!permission)
-			return false;
+			return true;
 		/** 从当前路由的 `handle` 字段里获取按钮级别的所有自定义 `code` 值 */
 		const metaAuth = currentRoute?.handle?.permissions;
 		if (!metaAuth) {
@@ -51,7 +51,7 @@ export function useAccess() {
 	 */
 	const hasRoles = (roles?: string | Array<string>) => {
 		if (!roles || !userRoles) {
-			return false;
+			return true;
 		}
 		roles = isString(roles) ? [roles] : roles;
 		roles = roles.map(item => item.toLowerCase());

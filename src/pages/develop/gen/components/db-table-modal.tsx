@@ -1,3 +1,8 @@
+/**
+ * 代码生成器 - 数据库表选择模态框
+ * 用于从现有数据库中选择要导入代码生成的表
+ */
+
 import type {
 	ProColumns,
 	ProFormInstance,
@@ -12,18 +17,30 @@ import { useTranslation } from "react-i18next";
 import { fetchImportTable } from "#src/api/develop/gen";
 import { fetchDbList } from "#src/api/develop/gen/index";
 
+/**
+ * 模态框属性
+ */
 interface ElementProps {
+	/** 是否显示 */
 	open: boolean
+	/** 关闭回调 */
 	onCloseChange: () => void
+	/** 刷新父表格数据 */
 	refreshTable?: () => void
-
+	/** 可选数据源名称列表 */
 	dataNames: string[]
 }
 
+/**
+ * 数据库表选择模态框
+ * @description 展示数据库中的表列表，支持按数据源筛选并批量导入
+ */
 export default function DbTableModal({ open, dataNames, onCloseChange, refreshTable }: ElementProps) {
 	const { t } = useTranslation();
 	const formRef = useRef<ProFormInstance>(undefined);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+	// 数据库表列定义
 	const columns: ProColumns<Develop.DbTable>[] = [
 		{
 			title: "数据源",
@@ -62,6 +79,27 @@ export default function DbTableModal({ open, dataNames, onCloseChange, refreshTa
 		},
 	];
 
+	/**
+	 * 执行导入操作
+	 */
+	const handleImport = async (reload?: () => void) => {
+		if (selectedRowKeys.length === 0) {
+			window.$message?.error("请选择要导入的表");
+			return;
+		}
+		const dataName = formRef.current?.getFieldValue("dataName");
+		const response = await fetchImportTable(selectedRowKeys.map(String), dataName);
+		if (response.code !== 200) {
+			window.$message?.error(response.message);
+			return;
+		}
+
+		window.$message?.success("导入成功");
+		reload?.();
+		onCloseChange?.();
+		refreshTable?.();
+	};
+
 	return (
 		<Modal
 			width="90%"
@@ -88,26 +126,10 @@ export default function DbTableModal({ open, dataNames, onCloseChange, refreshTa
 				}}
 				toolBarRender={action => [
 					<Button
-						key="Add"
+						key="import"
 						type="primary"
 						icon={<PlusSquareOutlined />}
-						onClick={async () => {
-							if (selectedRowKeys.length === 0) {
-								window.$message?.error("请选择要导入的表");
-								return;
-							}
-							const dataName = formRef.current?.getFieldValue("dataName");
-							const response = await fetchImportTable(selectedRowKeys.map(String), dataName);
-							if (response.code !== 200) {
-								window.$message?.error(response.message);
-								return;
-							}
-
-							window.$message?.success("导入成功");
-							action?.reload();
-							onCloseChange?.();
-							refreshTable?.();
-						}}
+						onClick={() => handleImport(action?.reload)}
 					>
 						导入
 					</Button>,
@@ -129,4 +151,4 @@ export default function DbTableModal({ open, dataNames, onCloseChange, refreshTa
 			/>
 		</Modal>
 	);
-};
+}

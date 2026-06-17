@@ -1,7 +1,6 @@
-import type { ButtonProps } from "antd";
 import type { NotificationItem } from "./types";
+import { Button, type ButtonProps } from "antd";
 
-import { BasicButton } from "#src/components/basic-button";
 import { RiMailCheckLine } from "#src/icons";
 import { cn } from "#src/utils/cn";
 
@@ -97,7 +96,7 @@ export const NotificationPopup: React.FC<Props> = ({ dot, notifications, onEvent
 						<div className="flex items-center justify-between">
 							<div>{t("widgets.notifications")}</div>
 							<Tooltip title={notifications?.length ? t("widgets.markAllAsRead") : null}>
-								<BasicButton
+								<Button
 									disabled={!notifications?.length}
 									onClick={handleMakeAll}
 									type="text"
@@ -108,16 +107,16 @@ export const NotificationPopup: React.FC<Props> = ({ dot, notifications, onEvent
 					)}
 					footer={(
 						<div className="flex items-center justify-between">
-							<BasicButton
+							<Button
 								disabled={!notifications?.length}
 								type="text"
 								onClick={handleClear}
 							>
 								{t("widgets.clearNotifications")}
-							</BasicButton>
-							<BasicButton onClick={handleViewAll}>
+							</Button>
+							<Button onClick={handleViewAll}>
 								{t("widgets.viewAll")}
-							</BasicButton>
+							</Button>
 						</div>
 					)}
 					dataSource={notifications}
@@ -138,7 +137,7 @@ export const NotificationPopup: React.FC<Props> = ({ dot, notifications, onEvent
 			)}
 		>
 
-			<BasicButton
+			<Button
 				size="large"
 				type="text"
 				{...restProps}
@@ -146,7 +145,7 @@ export const NotificationPopup: React.FC<Props> = ({ dot, notifications, onEvent
 				icon={<BellOutlined className="group-hover:animate-wiggle" />}
 			>
 				{dot && <span className="bg-blue-600 absolute right-2 top-1.5 h-2 w-2 rounded"></span>}
-			</BasicButton>
+			</Button>
 
 		</Popover>
 	);

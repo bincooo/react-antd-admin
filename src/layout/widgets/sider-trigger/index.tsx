@@ -1,4 +1,4 @@
-import { BasicButton } from "#src/components/basic-button";
+import { Button } from "antd";
 
 import { usePreferences } from "#src/hooks/use-preferences";
 import { cn } from "#src/utils/cn";
@@ -15,7 +15,7 @@ export function SiderTrigger({ className }: SiderTriggerProps) {
 	const { sidebarCollapsed, setPreferences, sidebarTheme } = usePreferences();
 
 	return (
-		<BasicButton
+		<Button
 			type="text"
 			style={{
 				boxShadow: "0px -3px 5px 0 rgb(29, 35, 41, 0.05)",

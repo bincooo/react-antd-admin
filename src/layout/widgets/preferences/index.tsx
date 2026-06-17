@@ -1,6 +1,5 @@
-import type { ButtonProps } from "antd";
+import { Button, type ButtonProps } from "antd";
 
-import { BasicButton } from "#src/components/basic-button";
 import { useDeviceType } from "#src/hooks/use-device-type";
 import { usePreferences } from "#src/hooks/use-preferences";
 import { loginPath } from "#src/router/extra-info";
@@ -51,7 +50,7 @@ export function Preferences({ ...restProps }: ButtonProps) {
 
 	return (
 		<>
-			<BasicButton
+			<Button
 				type="text"
 				{...restProps}
 				onClick={(e) => {
@@ -60,7 +59,7 @@ export function Preferences({ ...restProps }: ButtonProps) {
 				}}
 			>
 				<SettingOutlined />
-			</BasicButton>
+			</Button>
 			<ConfigProvider
 				theme={{
 					/**
@@ -85,7 +84,7 @@ export function Preferences({ ...restProps }: ButtonProps) {
 							color="blue"
 							offset={[-5, 5]}
 						>
-							<BasicButton
+							<Button
 								onPointerDown={() => !isDefault && reset()}
 								type="text"
 								icon={<RedoOutlined rotate={270} />}
@@ -94,18 +93,18 @@ export function Preferences({ ...restProps }: ButtonProps) {
 					)}
 					footer={(
 						<div className="flex justify-between">
-							<BasicButton
+							<Button
 								icon={<CopyOutlined rotate={180} />}
 								onPointerDown={handleCopyPreferences}
 							>
 								{t("preferences.copyPreferences")}
-							</BasicButton>
-							<BasicButton
+							</Button>
+							<Button
 								type="text"
 								onPointerDown={clearAndLogout}
 							>
 								{t("preferences.clearAndLogout")}
-							</BasicButton>
+							</Button>
 						</div>
 					)}
 					{...(isMobile

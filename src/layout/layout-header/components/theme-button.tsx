@@ -1,6 +1,5 @@
-import type { ButtonProps } from "antd";
+import { Button, type ButtonProps } from "antd";
 
-import { BasicButton } from "#src/components/basic-button";
 import { usePreferences } from "#src/hooks/use-preferences";
 import { RiMoonIcon, RiSunIcon } from "#src/icons";
 import { useEffect } from "react";
@@ -91,7 +90,7 @@ export function ThemeButton({ ...restProps }: ButtonProps) {
 	}
 
 	return (
-		<BasicButton
+		<Button
 			type="text"
 			{...restProps}
 			icon={isDark ? <RiSunIcon /> : <RiMoonIcon />}

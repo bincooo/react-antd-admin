@@ -1,3 +1,8 @@
+/**
+ * 代码生成器 - 代码预览弹窗
+ * 左侧文件树 + 右侧 Monaco Editor 代码高亮
+ */
+
 import type { TreeDataNode, TreeProps } from "antd";
 import type { SupportedLanguage } from "#src/components/code-mirror";
 import { FileOutlined, FolderOutlined } from "@ant-design/icons";
@@ -17,15 +22,20 @@ import { fetchPreviewCodes } from "#src/api/develop/gen";
 import CodeMirrorField from "#src/components/code-mirror";
 
 interface ElementProps {
+	/** 表 ID */
 	id?: string
+	/** 是否显示 */
 	open: boolean
+	/** 关闭回调 */
 	onCloseChange: () => void
 }
 
+/** 文件树中间结构 */
 interface TreeType {
 	[key: string]: string | TreeType
 }
 
+/** 文件扩展名 → Monaco 语言映射 */
 const langMap: Record<string, SupportedLanguage> = {
 	ts: "ts",
 	tsx: "tsx",
@@ -40,20 +50,25 @@ const langMap: Record<string, SupportedLanguage> = {
 	xml: "xml",
 };
 
+/**
+ * 根据文件名推断代码语言
+ */
 function langExtByFilename(filename?: string) {
 	if (!filename)
 		return;
 	const lower = filename.toLowerCase();
 	const parts = lower.split(".");
+	// Velocity 模板文件，取倒数第二个扩展名
 	if (parts.length >= 2 && parts[parts.length - 1] === "vm") {
-		const realExt = parts[parts.length - 2];
-		return langMap[realExt];
+		return langMap[parts[parts.length - 2]];
 	}
-
-	const ext = parts.pop()!;
-	return langMap[ext];
+	return langMap[parts.pop()!];
 }
 
+/**
+ * 将路径字符串转换为嵌套树结构
+ * 如 "src/main/java/com/example/Demo.java.vm" → 嵌套对象
+ */
 function convertTreeFile(path: string, value: string, container: TreeType = {}) {
 	const parts = path.split("/").filter(Boolean);
 	const last = parts.pop() as string;
@@ -62,18 +77,20 @@ function convertTreeFile(path: string, value: string, container: TreeType = {}) 
 		cur[part] ??= {};
 		cur = cur[part] as TreeType;
 	}
-
 	cur[last] = value;
 	return container;
 }
 
+/**
+ * 将嵌套树结构转换为 Ant Design Tree 数据格式
+ */
 function toTreeData(obj: TreeType, defaultKey?: string): [(TreeDataNode & { content?: string })[], string] {
 	let content = "";
 	const treeData: TreeDataNode[] = Object.entries(obj).map(([title, value]) => {
+		// 叶子节点（文件）
 		if (typeof value === "string") {
-			if (defaultKey === title) {
+			if (defaultKey === title)
 				content = value;
-			}
 			return {
 				key: title,
 				title: (
@@ -87,6 +104,7 @@ function toTreeData(obj: TreeType, defaultKey?: string): [(TreeDataNode & { cont
 			} as TreeDataNode & { content: string };
 		}
 
+		// 目录节点
 		const [children, code] = toTreeData(value, defaultKey);
 		if (code)
 			content = code;
@@ -105,50 +123,59 @@ function toTreeData(obj: TreeType, defaultKey?: string): [(TreeDataNode & { cont
 	return [treeData, content];
 }
 
+/**
+ * 代码预览弹窗
+ * @description 左侧显示生成的代码文件树，右侧显示代码内容，支持语法高亮
+ */
 export default function CodePreview({ id, open, onCloseChange }: ElementProps) {
 	const { token } = theme.useToken();
 	const [language, setLanguage] = useState<SupportedLanguage>("java");
-
 	const [value, setValue] = useState<string>();
+	const [selectedKeys, setSelectedKeys] = useState<React.Key[]>(["domain.java.vm"]);
+
+	/**
+	 * 复制代码到剪贴板
+	 */
 	const handleCopy = async (code: string) => {
 		await navigator.clipboard?.writeText(code ?? "");
 		window.$message?.success("已复制");
 	};
 
+	// 查询代码预览数据
 	const { data, isFetching } = useQuery({
 		queryKey: [id],
 		queryFn: async () => {
 			if (!id)
 				return;
 			const response = await fetchPreviewCodes(id);
-			if (response.code !== 200) {
+			if (response.code !== 200)
 				return;
-			}
 
 			let container: TreeType = {};
-			const data = response.data;
-			for (const key in data) {
-				container = convertTreeFile(key, data[key], container);
+			for (const key in response.data) {
+				container = convertTreeFile(key, response.data[key], container);
 			}
 			return container;
 		},
 	});
 
+	// 构建树形数据
 	const { treeData, content } = useMemo(() => {
-		const [treeData, content] = toTreeData(data ?? {}, "domain.java.vm");
-		return { treeData, content };
+		const [t, c] = toTreeData(data ?? {}, "domain.java.vm");
+		return { treeData: t, content: c };
 	}, [data]);
+
 	useEffect(() => {
-		if (content)
-			setValue(content);
+		if (content) setValue(content);
 	}, [content]);
 
-	const [selectedKeys, setSelectedKeys] = useState<React.Key[]>(["domain.java.vm"]);
+	/**
+	 * 树节点选中处理
+	 */
 	const onSelect: TreeProps<TreeDataNode & { content?: string }>["onSelect"] = (_, { node, selected }) => {
 		if (!selected)
 			return;
 		setSelectedKeys([node.key]);
-		// 叶子节点
 		if (node.isLeaf) {
 			const lang = langExtByFilename(node.key as string | undefined);
 			setLanguage(lang!);
@@ -156,9 +183,8 @@ export default function CodePreview({ id, open, onCloseChange }: ElementProps) {
 		setValue(node.content);
 	};
 
-	if (!id) {
+	if (!id)
 		return <span />;
-	}
 
 	return (
 		isFetching
@@ -170,11 +196,10 @@ export default function CodePreview({ id, open, onCloseChange }: ElementProps) {
 					title="生成预览"
 					footer={null}
 					destroyOnHidden
-					onCancel={() => {
-						onCloseChange();
-					}}
+					onCancel={() => onCloseChange()}
 				>
 					<Layout style={{ width: "100%", border: `1px solid ${token.colorBorder}` }}>
+						{/* 左侧文件树 */}
 						<Layout.Sider width="300px" style={{ backgroundColor: token.colorBgContainer, borderRight: `1px solid ${token.colorBorder}` }}>
 							<Tree<TreeDataNode & { content?: string }>
 								showLine={true}
@@ -184,6 +209,7 @@ export default function CodePreview({ id, open, onCloseChange }: ElementProps) {
 								treeData={treeData}
 							/>
 						</Layout.Sider>
+						{/* 右侧代码编辑器 */}
 						<Layout>
 							<Layout.Content>
 								<CodeMirrorField

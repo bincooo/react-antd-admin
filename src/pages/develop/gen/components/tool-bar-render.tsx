@@ -1,41 +1,53 @@
+/**
+ * 工具栏组件
+ * 展示批量删除和新增按钮
+ */
+
 import { DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons";
-import { Button } from "antd";
+import PermissionButton from "#src/components/permission-button";
 
-import { useAccess } from "#src/hooks/use-access";
-
+/**
+ * 工具栏属性
+ */
 interface ToolBarRenderProps {
-	selectedRowKeys: React.Key[]
+	/** 删除按钮加载状态 */
 	deleteLoading: boolean
+	/** 删除回调 */
 	onDelete: () => void
+	/** 新增回调 */
 	onAdd: () => void
 }
 
+/**
+ * 表格工具栏
+ * @description 渲染批量删除和新增按钮，根据权限控制启用状态
+ */
 export default function ToolBarRender({
-	selectedRowKeys,
 	deleteLoading,
 	onDelete,
 	onAdd,
 }: ToolBarRenderProps) {
-	const { hasPerms } = useAccess();
 	return [
-		<Button
+		// 批量删除按钮
+		<PermissionButton
 			loading={deleteLoading}
 			key="delete"
 			danger
 			icon={<DeleteOutlined />}
-			disabled={!hasPerms("develop:gen:delete")}
+			perm="develop:gen:delete"
 			onClick={onDelete}
 		>
 			删除
-		</Button>,
-		<Button
+		</PermissionButton>,
+		// 新增按钮
+		<PermissionButton
 			key="add"
 			icon={<PlusCircleOutlined />}
 			type="primary"
-			disabled={!hasPerms("develop:gen:create")}
+			perm="develop:gen:create"
 			onClick={onAdd}
 		>
 			新增
-		</Button>,
+		</PermissionButton>,
 	];
 }

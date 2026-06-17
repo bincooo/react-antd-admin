@@ -1,6 +1,4 @@
-import type { MenuProps } from "antd";
-
-import { BasicButton } from "#src/components/basic-button";
+import { Button, type MenuProps } from "antd";
 import { cn } from "#src/utils/cn";
 
 import { DownOutlined } from "@ant-design/icons";
@@ -54,7 +52,7 @@ export function TabOptions({ activeKey, className }: TabOptionsProps) {
 			open={isOpen}
 			onOpenChange={onOpenChange}
 		>
-			<BasicButton
+			<Button
 				className={cn(className)}
 				size="middle"
 				type="text"

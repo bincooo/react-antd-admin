@@ -6,15 +6,14 @@ import type {
 import { DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Button, Tag } from "antd";
+import { Tag } from "antd";
 import { createElement, useRef, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import * as api from "#src/api/system/menu";
 import { BasicContent } from "#src/components/basic-content";
 import { BasicTable } from "#src/components/basic-table";
-import { useAccess } from "#src/hooks/use-access";
-
+import PermissionButton from "#src/components/permission-button";
 import { menuIcons } from "#src/icons/menu-icons";
 
 import { handleTree } from "#src/utils/tree";
@@ -23,7 +22,6 @@ import Edit from "./components/edit";
 
 export default function Page() {
 	const { t } = useTranslation();
-	const { hasPerms } = useAccess();
 
 	const deleteMutation = useMutation({
 		mutationFn: async (ids: (string | number)[]) => {
@@ -36,9 +34,8 @@ export default function Page() {
 		},
 	});
 
-	const [isOpen, setIsOpen] = useState(false);
-	const [title, setTitle] = useState("");
-	const [menuId, setMenuId] = useState<string | number>();
+	const [editVisible, setEditVisible] = useState(false);
+	const [editId, setEditId] = useState<string | number>();
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
 	const [menuList, setMenuList] = useState<System.Menu[]>([]);
@@ -49,8 +46,8 @@ export default function Page() {
 	};
 
 	const onCloseChange = (refresh?: boolean) => {
-		setIsOpen(false);
-		setMenuId(undefined);
+		setEditVisible(false);
+		setEditId(undefined);
 		if (refresh) {
 			refreshTable();
 		}
@@ -132,31 +129,30 @@ export default function Page() {
 			disable: true,
 			render: (node, record) => {
 				return [
-					<Button
+					<PermissionButton
 						key="update"
 						type="link"
 						size="small"
-						disabled={!hasPerms("system:menu:update")}
+						perm="system:menu:update"
 						onClick={() => {
-							setMenuId(record.menuId);
-							setIsOpen(true);
-							setTitle("编辑菜单权限");
+							setEditId(record.menuId);
+							setEditVisible(true);
 						}}
 					>
 						编辑
-					</Button>,
-					<Button
+					</PermissionButton>,
+					<PermissionButton
 						key="delete"
 						type="link"
 						size="small"
 						danger={true}
-						disabled={!hasPerms("system:menu:delete")}
+						perm="system:menu:delete"
 						onClick={() => {
 							handleDeleteRow([record.menuId!]);
 						}}
 					>
 						删除
-					</Button>,
+					</PermissionButton>,
 				];
 			},
 		},
@@ -190,38 +186,36 @@ export default function Page() {
 					};
 				}}
 				toolBarRender={() => [
-					<Button
+					<PermissionButton
 						key="delete"
 						icon={<DeleteOutlined />}
 						danger
-						disabled={!hasPerms("system:menu:delete")}
+						perm="system:menu:delete"
 						onClick={() => {
 							handleDeleteRow([...selectedRowKeys.map(String)]);
 						}}
 					>
 						删除
-					</Button>,
-					<Button
+					</PermissionButton>,
+					<PermissionButton
 						key="create"
 						icon={<PlusCircleOutlined />}
 						type="primary"
-						disabled={!hasPerms("system:menu:create")}
+						perm="system:menu:create"
 						onClick={() => {
-							setIsOpen(true);
-							setTitle("创建菜单权限");
+							setEditVisible(true);
 						}}
 					>
 						新增
-					</Button>,
+					</PermissionButton>,
 				]}
 			/>
 
 			<Edit
-				key={menuId}
-				title={title}
-				menuId={menuId}
+				key={editId}
+				pkId={editId}
 				menuList={menuList}
-				open={isOpen}
+				open={editVisible}
 				onClose={onCloseChange}
 			/>
 		</BasicContent>

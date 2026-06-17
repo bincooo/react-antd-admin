@@ -1,4 +1,3 @@
-import { BasicButton } from "#src/components/basic-button";
 import { PASSWORD_RULES, USERNAME_RULES } from "#src/constants/rules";
 
 import {
@@ -123,7 +122,7 @@ export function RegisterPassword() {
 
 				<div className="text-sm text-center">
 					{t("authority.alreadyHaveAnAccount")}
-					<BasicButton
+					<Button
 						type="link"
 						className="px-1"
 						onPointerDown={() => {
@@ -131,7 +130,7 @@ export function RegisterPassword() {
 						}}
 					>
 						{t("authority.goToLogin")}
-					</BasicButton>
+					</Button>
 				</div>
 			</Form>
 		</>
