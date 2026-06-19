@@ -3,42 +3,26 @@ import type {
 	ProColumns,
 	ProCoreActionType,
 } from "@ant-design/pro-components";
+
 import { DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons";
-
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Tag } from "antd";
-import { createElement, useRef, useState } from "react";
 
+import { Switch, Tag } from "antd";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import * as api from "#src/api/system/menu";
+import * as api from "#src/api/system/ossConfig";
 import { BasicContent } from "#src/components/basic-content";
 import { BasicTable } from "#src/components/basic-table";
-import PermissionButton from "#src/components/permission-button";
-import { menuIcons } from "#src/icons/menu-icons";
 
-import { handleTree } from "#src/utils/tree";
+import PermissionButton from "#src/components/permission-button";
 import { getColumnList } from "./columns";
 import Edit from "./components/edit";
 
 export default function Page() {
 	const { t } = useTranslation();
-
-	const deleteMutation = useMutation({
-		mutationFn: async (ids: (string | number)[]) => {
-			const { code, message } = await api.deleteByIds(ids);
-			if (code !== 200) {
-				window.$message?.error(message);
-				throw new Error(message);
-			}
-			return true;
-		},
-	});
-
 	const [editVisible, setEditVisible] = useState(false);
 	const [editId, setEditId] = useState<string | number>();
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-
-	const [menuList, setMenuList] = useState<System.Menu[]>([]);
 
 	const actionRef = useRef<ActionType>(null);
 	const refreshTable = () => {
@@ -53,6 +37,29 @@ export default function Page() {
 		}
 	};
 
+	/** 删除接口 */
+	const deleteMutation = useMutation({
+		mutationFn: async (ids: (string | number)[]) => {
+			const { code, message } = await api.deleteByIds(ids);
+			if (code !== 200) {
+				window.$message?.error(message);
+				throw new Error(message);
+			}
+			return true;
+		},
+	});
+
+	const udpateStatusMutation = useMutation({
+		mutationFn: async (data: System.OssConfig.UpdateStatus) => {
+			const { code, message } = await api.changeStatus(data);
+			if (code !== 200) {
+				window.$message?.error(message);
+				throw new Error(message);
+			}
+			return true;
+		},
+	});
+
 	const handleDeleteRow = async (
 		ids: Array<string | number>,
 		action?: ProCoreActionType<object>,
@@ -63,7 +70,7 @@ export default function Page() {
 		}
 
 		window.$modal?.confirm({
-			title: "确认删除菜单权限？",
+			title: "确认删除对象存储配置？",
 			content: "此操作不可恢复",
 			onOk: async () => {
 				const ok = await deleteMutation.mutateAsync(ids);
@@ -81,41 +88,52 @@ export default function Page() {
 		});
 	};
 
-	const columns: ProColumns<System.Menu>[] = [
-		...getColumnList(t, {
-			menuName: (column) => {
-				// TODO - 自定列
-				return {
-					...column,
-					render(text) {
-						if (typeof text === "string" && text.includes(".")) {
-							return t(text);
-						}
-						return text;
-					},
-				};
+	const handleStatusRow = async (data: System.OssConfig.UpdateStatus) => {
+		window.$modal?.confirm({
+			title: `确认${data.status === "1" ? "停用" : "启用"}对象存储配置？`,
+			content: "此操作不可恢复",
+			onOk: async () => {
+				const ok = await udpateStatusMutation.mutateAsync(data);
+				if (!ok)
+					return;
+				refreshTable();
 			},
+		});
+	};
+
+	const columns: ProColumns<System.OssConfig>[] = [
+		...getColumnList(t, {
 			status: (column) => {
 				return {
 					...column,
 					render(node, record) {
 						return (
-							<Tag color={record.status === "1" ? "error" : "success"} children={node} />
+							<Switch
+								loading={udpateStatusMutation.isPending}
+								checkedChildren="是"
+								unCheckedChildren="否"
+								checked={record.status === "0"}
+								onChange={(checked) => {
+									handleStatusRow({
+										ossConfigId: record.ossConfigId,
+										status: checked ? "0" : "1",
+									});
+								}}
+							/>
 						);
 					},
 				};
 			},
-			icon: (column) => {
+			isHttps: (column) => {
 				return {
 					...column,
-					render(text) {
-						return typeof (text) === "string" && menuIcons[text]
-							? createElement(menuIcons[text], {
-								style: {
-									fontSize: 18,
-								},
-							})
-							: text;
+					render(node, record) {
+						return (
+							<Tag
+								color={record.isHttps === "0" ? "success" : "default"}
+								children={node}
+							/>
+						);
 					},
 				};
 			},
@@ -133,9 +151,9 @@ export default function Page() {
 						key="update"
 						type="link"
 						size="small"
-						perm="system:menu:update"
+						perm="system:ossConfig:update"
 						onClick={() => {
-							setEditId(record.menuId);
+							setEditId(record.ossConfigId);
 							setEditVisible(true);
 						}}
 					>
@@ -146,9 +164,9 @@ export default function Page() {
 						type="link"
 						size="small"
 						danger={true}
-						perm="system:menu:delete"
+						perm="system:ossConfig:delete"
 						onClick={() => {
-							handleDeleteRow([record.menuId!]);
+							handleDeleteRow([record.ossConfigId!]);
 						}}
 					>
 						删除
@@ -160,29 +178,27 @@ export default function Page() {
 
 	return (
 		<BasicContent className="h-full">
-			<BasicTable<System.Menu>
+			<BasicTable<System.OssConfig>
 				adaptive
-				rowKey="menuId"
+				rowKey="ossConfigId"
 				columns={columns}
 				actionRef={actionRef}
-				pagination={false}
 				rowSelection={{
 					selectedRowKeys,
-					checkStrictly: false,
 					preserveSelectedRowKeys: true,
 					onChange: (keys) => {
 						setSelectedRowKeys(keys);
 					},
 				}}
 				request={async (params) => {
-					const { code, data, message } = await api.page({ ...params, pageNum: params.current });
-					if (code === 200) {
-						setMenuList(data.filter(it => it.menuType !== "F"));
-					}
+					const response = await api.page({
+						...params,
+						pageNum: params.current,
+					});
 					return {
-						code,
-						message,
-						data: handleTree(data, "menuId"),
+						...response,
+						data: response.data?.list,
+						total: response.data?.total,
 					};
 				}}
 				toolBarRender={() => [
@@ -190,7 +206,7 @@ export default function Page() {
 						key="delete"
 						icon={<DeleteOutlined />}
 						danger
-						perm="system:menu:delete"
+						perm="system:ossConfig:delete"
 						onClick={() => {
 							handleDeleteRow([...selectedRowKeys.map(String)]);
 						}}
@@ -201,7 +217,7 @@ export default function Page() {
 						key="create"
 						icon={<PlusCircleOutlined />}
 						type="primary"
-						perm="system:menu:create"
+						perm="system:ossConfig:create"
 						onClick={() => {
 							setEditVisible(true);
 						}}
@@ -214,7 +230,6 @@ export default function Page() {
 			<Edit
 				key={editId}
 				pkId={editId}
-				menuList={menuList}
 				open={editVisible}
 				onClose={onCloseChange}
 			/>

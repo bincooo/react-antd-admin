@@ -1,5 +1,4 @@
 import type { UppyFile } from "@uppy/core";
-import { Buffer } from "node:buffer";
 import {
 	CheckCircleOutlined,
 	CloseCircleOutlined,
@@ -27,8 +26,8 @@ import {
 	Typography,
 	Upload,
 } from "antd";
-
 import { createCRC32 } from "hash-wasm";
+
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { createPresigned } from "#src/api/common";
 
@@ -134,13 +133,7 @@ async function getChecksumCRC32(file: UppyFile): Promise<string> {
 			hexChecksum.match(/.{1,2}/g)!.map((byte: string) => Number.parseInt(byte, 16)),
 		);
 
-		// 使用 Buffer 进行 Base64 编码（Node.js 环境）
-		// 或使用 btoa（浏览器环境）
-		const base64Checksum = typeof Buffer !== "undefined"
-			? Buffer.from(bytes).toString("base64")
-			: btoa(String.fromCharCode(...bytes));
-
-		return base64Checksum;
+		return btoa(String.fromCharCode(...bytes));
 	}
 	catch (error) {
 		console.error("CRC32 计算失败:", error);
