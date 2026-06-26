@@ -69,7 +69,7 @@ function checkboxItemProps(namePath: (string | number)[]) {
 export default function FieldInfo({ dictList, dataSource }: FieldInfoProps) {
 	const form = Form.useFormInstance();
 	const [data, setData] = useState(dataSource);
-	const [isEditing, setIsEditing] = useState(false);
+	const [drag, setDrag] = useState(false);
 
 	// 字段 ID → 索引 映射表
 	const idIndexMap = useMemo(() => {
@@ -179,7 +179,7 @@ export default function FieldInfo({ dictList, dataSource }: FieldInfoProps) {
 		];
 
 		// 查看模式直接返回
-		if (!isEditing)
+		if (drag)
 			return base;
 
 		// 编辑模式：覆盖 render 为表单控件
@@ -191,7 +191,7 @@ export default function FieldInfo({ dictList, dataSource }: FieldInfoProps) {
 		base[8].render = renderCheckboxCell("isList");
 		base[9].render = renderCheckboxCell("isQuery");
 		base[10].render = renderColumnCell("queryType", <Select style={{ width: 100 }} options={queryTypeOptions} showSearch />);
-		base[11].render = renderCheckboxCell("required");
+		base[11].render = renderCheckboxCell("isRequired");
 		base[12].render = renderColumnCell("htmlType", <Select style={{ width: 120 }} options={htmlTypeOptions} showSearch />);
 		base[13].render = (_: React.ReactNode, record: Develop.TableColumn) => {
 			const idx = idIndexMap.get(record.columnId);
@@ -201,39 +201,39 @@ export default function FieldInfo({ dictList, dataSource }: FieldInfoProps) {
 		};
 
 		return base;
-	}, [idIndexMap, dictList, isEditing, renderColumnCell, renderCheckboxCell, renderOptionLabel, renderBooleanLabel, renderDictTypeLabel]);
+	}, [idIndexMap, dictList, drag, renderColumnCell, renderCheckboxCell, renderOptionLabel, renderBooleanLabel, renderDictTypeLabel]);
 
 	/**
 	 * 切换编辑状态
 	 * 关闭编辑时将表单最新值同步到 dataSource
 	 */
 	const handleToggleEdit = useCallback(() => {
-		if (isEditing) {
+		if (!drag) {
 			const values = form.getFieldValue("columns") as Develop.TableColumn[];
 			if (values)
 				setData(values);
 		}
-		setIsEditing(!isEditing);
-	}, [isEditing, form]);
+		setDrag(!drag);
+	}, [drag, form]);
 
 	return (
 		<DragSortTable<Develop.TableColumn>
 			rowKey="columnId"
 			styles={{ body: { cell: { padding: 5, height: 50 } } }}
-			scroll={{ y: "calc(100vh - 511px)", x: "max-content" }}
+			scroll={{ y: "calc(100vh - 530px)", x: "max-content" }}
 			dataSource={data}
 			pagination={false}
-			dragSortKey={isEditing ? "" : "sort"}
+			dragSortKey={drag ? "sort" : ""}
 			onDragSortEnd={handleDragSortEnd}
 			search={false}
 			columns={columns}
 			toolBarRender={() => [
 				<Button
 					key="toggle"
-					type={isEditing ? "default" : "primary"}
+					type={drag ? "default" : "primary"}
 					onClick={handleToggleEdit}
 				>
-					{isEditing ? "关闭" : "编辑"}
+					{drag ? "关闭" : "排序"}
 				</Button>,
 			]}
 		/>

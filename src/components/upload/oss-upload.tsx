@@ -55,6 +55,8 @@ export interface S3UploaderProps {
 interface Meta {
 	objectKey: string
 	path: string
+
+	[key: string]: unknown
 }
 
 // 根据文件类型返回对应图标（用于非图片预览）

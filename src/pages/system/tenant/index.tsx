@@ -7,10 +7,9 @@ import type {
 import { DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-import { Switch, Tag } from "antd";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import * as api from "#src/api/system/ossConfig";
+import * as api from "#src/api/system/tenant";
 import { BasicContent } from "#src/components/basic-content";
 import { BasicTable } from "#src/components/basic-table";
 
@@ -49,17 +48,6 @@ export default function Page() {
 		},
 	});
 
-	const udpateStatusMutation = useMutation({
-		mutationFn: async (data: System.OssConfig.UpdateStatus) => {
-			const { code, message } = await api.changeStatus(data);
-			if (code !== 200) {
-				window.$message?.error(message);
-				throw new Error(message);
-			}
-			return true;
-		},
-	});
-
 	const handleDeleteRow = async (
 		ids: Array<string | number>,
 		action?: ProCoreActionType<object>,
@@ -70,7 +58,7 @@ export default function Page() {
 		}
 
 		window.$modal?.confirm({
-			title: "确认删除对象存储配置？",
+			title: "确认删除租户？",
 			content: "此操作不可恢复",
 			onOk: async () => {
 				const ok = await deleteMutation.mutateAsync(ids);
@@ -88,55 +76,11 @@ export default function Page() {
 		});
 	};
 
-	const handleStatusRow = async (data: System.OssConfig.UpdateStatus) => {
-		window.$modal?.confirm({
-			title: `确认${data.status === "1" ? "停用" : "启用"}对象存储配置？`,
-			content: "此操作不可恢复",
-			onOk: async () => {
-				const ok = await udpateStatusMutation.mutateAsync(data);
-				if (!ok)
-					return;
-				refreshTable();
-			},
-		});
-	};
-
-	const columns: ProColumns<System.OssConfig>[] = [
+	const columns: ProColumns<System.Tenant>[] = [
 		...getColumnList(t, {
-			status: (column) => {
-				return {
-					...column,
-					render(node, record) {
-						return (
-							<Switch
-								loading={udpateStatusMutation.isPending}
-								checkedChildren="是"
-								unCheckedChildren="否"
-								checked={record.status === "0"}
-								onChange={(checked) => {
-									handleStatusRow({
-										ossConfigId: record.ossConfigId,
-										status: checked ? "0" : "1",
-									});
-								}}
-								disabled={record.status === "0"}
-							/>
-						);
-					},
-				};
-			},
-			isHttps: (column) => {
-				return {
-					...column,
-					render(node, record) {
-						return (
-							<Tag
-								color={record.isHttps === "0" ? "success" : "default"}
-								children={node}
-							/>
-						);
-					},
-				};
+			XXX: (column) => {
+				// TODO - 自定列
+				return column;
 			},
 		}),
 		{
@@ -152,9 +96,10 @@ export default function Page() {
 						key="update"
 						type="link"
 						size="small"
-						perm="system:ossConfig:update"
+						perm="system:tenant:update"
+						disabled={record.tenantId === "000000"}
 						onClick={() => {
-							setEditId(record.ossConfigId);
+							setEditId(record.id);
 							setEditVisible(true);
 						}}
 					>
@@ -165,9 +110,10 @@ export default function Page() {
 						type="link"
 						size="small"
 						danger={true}
-						perm="system:ossConfig:delete"
+						perm="system:tenant:delete"
+						disabled={record.tenantId === "000000"}
 						onClick={() => {
-							handleDeleteRow([record.ossConfigId!]);
+							handleDeleteRow([record.id!]);
 						}}
 					>
 						删除
@@ -179,9 +125,9 @@ export default function Page() {
 
 	return (
 		<BasicContent className="h-full">
-			<BasicTable<System.OssConfig>
+			<BasicTable<System.Tenant>
 				adaptive
-				rowKey="ossConfigId"
+				rowKey="id"
 				columns={columns}
 				actionRef={actionRef}
 				rowSelection={{
@@ -207,7 +153,7 @@ export default function Page() {
 						key="delete"
 						icon={<DeleteOutlined />}
 						danger
-						perm="system:ossConfig:delete"
+						perm="system:tenant:delete"
 						onClick={() => {
 							handleDeleteRow([...selectedRowKeys.map(String)]);
 						}}
@@ -218,7 +164,7 @@ export default function Page() {
 						key="create"
 						icon={<PlusCircleOutlined />}
 						type="primary"
-						perm="system:ossConfig:create"
+						perm="system:tenant:create"
 						onClick={() => {
 							setEditVisible(true);
 						}}

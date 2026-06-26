@@ -99,7 +99,7 @@ export default function Edit() {
 						>
 							<Tabs
 								styles={{
-									content: { height: "calc(100vh - 400px)", overflow: "auto" },
+									content: { height: "calc(100vh - 350px)", overflow: "auto" },
 								}}
 								defaultActiveKey="1"
 								items={[
@@ -138,7 +138,7 @@ export default function Edit() {
 					</Layout.Content>
 
 					{/* 底部操作栏 */}
-					<Layout.Footer style={{ textAlign: "center", backgroundColor: token.colorBgContainer }}>
+					<Layout.Footer style={{ textAlign: "center", backgroundColor: token.colorBgContainer, padding: 0 }}>
 						<Divider />
 						<Space>
 							<Button
